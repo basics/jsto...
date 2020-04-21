@@ -1,10 +1,14 @@
-const defaultAwesomeFunction = (name) => {
-  const returnStr = `I am the Default Awesome Function, fellow comrade! - ${name}`;
-  return returnStr;
-};
+// eslint-disable-next-line no-unused-vars
+export function typ(c) {
+  return undefined;
+}
 
-const awesomeFunction = () => 'I am just an Awesome Function';
+// eslint-disable-next-line no-unused-vars
+export function fun(type, func) {
+  return undefined;
+}
 
-export default defaultAwesomeFunction;
-
-export { awesomeFunction };
+// eslint-disable-next-line no-unused-vars
+export function cls(prototype) {
+  return undefined;
+}
