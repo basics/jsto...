@@ -1,0 +1,28 @@
+const babel = require('rollup-plugin-babel');
+const resolve = require('rollup-plugin-node-resolve');
+const minify = require('rollup-plugin-babel-minify');
+
+module.exports = [{
+  input: 'src/index.js',
+  output: {
+    name: 'basics',
+    file: 'lib/bundle.min.js',
+    format: 'umd',
+    exports: 'named',
+    extend: true
+  },
+
+  plugins: [
+    resolve(),
+    babel({
+      babelrc: false,
+      exclude: 'node_modules/**',
+      presets: [['@babel/preset-env', { modules: false }]]
+    }),
+    minify({
+      comments: false,
+      banner: '/* vector class - MIT License */',
+      bannerNewLine: true
+    })
+  ]
+}];
