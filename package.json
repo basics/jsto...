@@ -62,7 +62,7 @@
     "rollup-plugin-babel": "4.4.0",
     "rollup-plugin-babel-minify": "10.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
-    "semantic-release": "17.0.6"
+    "semantic-release": "17.0.7"
   },
   "dependencies": {
     "core-js": "^3.6.5",
