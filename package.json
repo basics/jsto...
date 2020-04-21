@@ -1,7 +1,7 @@
 {
-  "name": "@js-basics/blueprint-npm-module",
-  "version": "1.3.2",
-  "description": "blueprint to create npm modules",
+  "name": "@js-basics/jsto...",
+  "version": "0.0.1",
+  "description": "transpile javascript to other languages",
   "main": "./lib/index.js",
   "directories": {
     "example": "examples",
@@ -25,18 +25,18 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/basics/blueprint-npm-module.git"
+    "url": "https://github.com/basics/jsto....git"
   },
   "keywords": [
-    "blueprint",
-    "npm",
-    "module"
+    "transpiler",
+    "types",
+    "javascript"
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/basics/blueprint-npm-module/issues"
+    "url": "https://github.com/basics/jsto.../issues"
   },
-  "homepage": "https://github.com/basics/blueprint-npm-module#readme",
+  "homepage": "https://github.com/basics/jsto...#readme",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.0",

@@ -21,7 +21,7 @@ module.exports = [{
     }),
     minify({
       comments: false,
-      banner: '/* vector class - MIT License */',
+      banner: '/* jsto... - MIT License */',
       bannerNewLine: true
     })
   ]
