@@ -6,10 +6,7 @@
           "@babel/preset-env",
           {
             "targets": {
-              "browsers": [
-                "last 2 versions",
-                "ie >= 11"
-              ],
+              "chrome": "63"
             },
             "corejs": "3.1.4",
             "useBuiltIns": "usage"
@@ -26,19 +23,10 @@
           "@babel/preset-env",
           {
             "targets": {
-              "browsers": [
-                "last 2 versions",
-                "ie >= 11"
-              ],
+              "chrome": "63"
             },
             "corejs": "3.1.4",
             "useBuiltIns": "usage"
-          }
-        ],
-        [
-          "minify",
-          {
-            "builtIns": false
           }
         ]
       ],
