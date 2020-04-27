@@ -5,6 +5,11 @@
     "mocha": true
   },
   "rules": {
-    "comma-dangle": ["error", "only-multiline"]
+    "comma-dangle": [
+      "error",
+      "only-multiline"
+    ],
+    "no-use-before-define": "off",
+    "consistent-return": "off"
   }
 }
