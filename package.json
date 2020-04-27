@@ -65,6 +65,7 @@
     "semantic-release": "17.0.6"
   },
   "dependencies": {
-    "core-js": "^3.6.5"
+    "core-js": "^3.6.5",
+    "acorn": "7.1.1"
   }
 }
