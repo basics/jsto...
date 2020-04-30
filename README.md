@@ -6,3 +6,45 @@
 [![DevDependencies Status](https://david-dm.org/basics/jsto.../dev-status.svg)](https://david-dm.org/basics/jsto...?type=dev)
 
 # jsto...
+
+this libary is going to provide you a simple way of writing typed javascript code.
+this code can run and tested directly with javascript.
+but with types it can be transpiled to other languages, too.
+
+a type checker is in process, too. there will be a simple checking without type inference, 
+this can be archived with typescript, but not at runtime.
+
+
+| environment               | my type checker | typescript |
+| --------------------------|:---------------:|:----------:|
+| run time                  | ✓               | ✗          |
+| build time                | ✓               | ✓          |
+| IDE time (the best time)  | ✗               | ✓          |
+
+| typesafe  | my type checker | typescript |
+| ----------|:---------------:|:----------:|
+| functions | ✓               | ✓          |
+| arguments | ✓               | ✓          |
+| classes   | ✗               | ✓          |
+| methods   | ✗               | ✓          |
+| variables | ✗               | ✓          |
+
+features in process
+- [ ] generate JSTree out of javascript
+  - ESTree + type annotations
+- [ ] index.d.ts file with generics for typescript
+- [ ] jstoGLSL transpiler
+  - generate valid glsl code
+  - glsl polyfills
+    - modulo as arithmetic operator
+    - destruct
+    - functional structs
+- [ ] jstoGLSL simulator
+  - there are some js-glsl simulator out there, have to evaluate them
+
+in future
+- [ ] jstoWASM transpiler 
+  inspired by https://github.com/AssemblyScript/assemblyscript
+  use decompiler to compare https://v8.dev/blog/wasm-decompile
+- [ ] jstoWASM simulator
+- [ ] what other languages do we need?
