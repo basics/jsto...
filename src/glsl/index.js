@@ -1,25 +1,11 @@
-import { parse } from 'acorn';
+import { parse } from '../jstree';
 
-const qualifiers = {
-  varying: 'varying',
-  uniform: 'uniform',
-  attribute: 'attribute',
-  struct: 'struct'
-};
-
-
-const types = {
-  vec2: 'vec2',
-  vec3: 'vec3',
-  vec4: 'vec4',
-  mat3: 'mat3',
-  mat4: 'mat4',
-  // 'sampler2D': 'sampler2D',
-  // 'samplerCube': 'samplerCube',
-  float: 'float',
-  int: 'int',
-  bool: 'bool'
-};
+const qualifiers = [
+  'varying',
+  'uniform',
+  'attribute',
+  'struct'
+];
 
 function handleNode(node) {
   const { type } = node;
@@ -173,7 +159,16 @@ function retSta({ argument }) {
 }
 
 function ident(node) {
-  return node.name;
+  let { name, typeAnnotation, qualifier } = node;
+  let q = '';
+  if (qualifier) {
+    q = `${qualifier} `;
+  }
+  let t = '';
+  if (typeAnnotation) {
+    t = `${typeAnnotation} `;
+  }
+  return `${q}${t}${name}`;
 }
 
 function memExp(node) {
@@ -197,8 +192,7 @@ function binExp(node) {
 }
 
 function assExp(node) {
-  const { left, operator, right } = node;
-  return `${handleNode(left)} ${getOperator(operator)} ${handleNode(right)}`;
+  throwError('Default paramameters not supported in GLSL', node);
 }
 
 function getOperator(operator) {
@@ -213,9 +207,7 @@ function expSta(node) {
 }
 
 function assPat(node) {
-  // console.log('assPat()', node.name, node);
-  const { left, right } = node;
-  return handleAssign({ init: right, id: left });
+  throwError('Default paramameters not supported in GLSL', node);
 }
 
 function arrFun(node) {
@@ -247,88 +239,30 @@ function throwError(msg, node, ...args) {
 }
 
 function handleAssign({ init, id }) {
+  let { name, typeAnnotation, qualifier: q } = id;
+
+  let allocation = '';
   if (!init) {
-    throwError(`no type defined for ${id.name}`, id);
+    if (!typeAnnotation) {
+      throwError(`
+      no type defined for ${id.name}
+      ${JSON.stringify(id)}
+    `, id);
+    }
+
+  } else {
+    if (init.type === 'ArrowFunctionExpression') {
+      typeAnnotation = init.returnType;
+    }
+    allocation = handleNode(init);
   }
 
-  const { name } = id;
-  let node = init;
   let qualifier = '';
-  if (node.callee && qualifiers[node.callee.name]) {
-    qualifier = `${qualifiers[node.callee.name]} `;
-    [node] = node.arguments;
+  if (q) {
+    qualifier = `${q} `;
   }
 
-  if (node.type === 'CallExpression') {
-    // console.log('varDec()', name, init);
-
-    let allocation = '';
-
-    // if(types[node.callee.name]) {
-    const type = `${node.callee.name} `;
-    if (node.arguments.length) {
-      // allocation = ` = ${handleNode(node.arguments[0])}`;
-
-      if (node.arguments[0].type === 'ArrowFunctionExpression') {
-        allocation = handleNode(node.arguments[0]);
-      } else if (types[node.callee.name]) {
-        allocation = ` = ${node.callee.name}(${node.arguments.map(handleNode).join(', ')})`;
-      } else {
-        allocation = `; ${name} = ${node.arguments.map(handleNode).join(', ')}`;
-      }
-    }
-
-    /* } else {
-        allocation = ` = ${handleNode(node.callee)}`;
-        console.log('no type?'. node);
-    } */
-    if (!type) {
-      throwError(`no type defined for ${id.name}`, id);
-    }
-    // console.log('typedef', name, node);
-    return `${qualifier}${type}${name}${allocation}`;
-  }
-  if (node.type === 'MemberExpression') {
-    console.log('bad', node, id);
-
-    // if(true || types[node.object.name]) {
-    const type = node.object.name;
-    /*
-    if (node.object.property) {
-        return `${qualifier}${type}${name} = ${handleNode(node.object)}`;
-    }
-    */
-    return `${qualifier}${type} ${name}[${node.property.raw}]`;
-    // }
-  }
-  if (node.type === 'Identifier') {
-    // if(true || types[node.name]) {
-    return `${qualifier}${node.name} ${name}`;
-    // }
-  }
-  if (node.type === 'Literal') {
-    const { raw } = node;
-    if (raw === 'true' || raw === 'false') {
-      return `${qualifier}bool ${name} = ${raw}`;
-    }
-    if (!Number.isNaN(raw)) {
-      if (raw.indexOf('.') >= 0) {
-        return `${qualifier}float ${name} = ${raw}`;
-      }
-      return `${qualifier}int ${name} = ${raw}`;
-    }
-  }
-  if (node.type === 'ArrowFunctionExpression') {
-    return `void ${name}${handleNode(init)}`;
-  }
-  if (node.type === 'ObjectExpression') {
-    return `${qualifier}${name} {\n${node.properties.map(handleNode).join('\n')}\n};`;
-  }
-  // if(node.type === 'ObjectPattern') {
-  //    return `${node.properties.map(handleNode).join('; ')}`;
-  // }
-
-  throwError(`no type defined for ${id.name}`, init, id, node);
+  return `${qualifier}${typeAnnotation} ${name}${allocation}`;
 }
 
 function handleBody(body, tabCount = 0) {
@@ -347,7 +281,7 @@ export function buildGLSL(fun) {
 
   let ast;
   try {
-    ast = parse(str, { preserveParens: true, locations: true });
+    ast = parse(str, { preserveParens: true, locations: true, qualifiers, integer: 'int', float: 'float', string: '!!StringIsNotSupported!!', boolean: 'bool' });
 
 
     const { body } = ast.body[0].expression;
