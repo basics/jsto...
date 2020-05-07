@@ -15,13 +15,13 @@ a type checker is in process, too. there will be a simple checking without type 
 this can be archived with typescript, but not at runtime.
 
 
-| environment               | my type checker | typescript |
+| environment               | jsto... checker | typescript |
 | --------------------------|:---------------:|:----------:|
 | run time                  | ✓               | ✗          |
 | build time                | ✓               | ✓          |
 | IDE time (the best time)  | ✗               | ✓          |
 
-| typesafe  | my type checker | typescript |
+| typesafe  | jsto... checker | typescript |
 | ----------|:---------------:|:----------:|
 | functions | ✓               | ✓          |
 | arguments | ✓               | ✓          |
@@ -29,18 +29,21 @@ this can be archived with typescript, but not at runtime.
 | methods   | ✗               | ✓          |
 | variables | ✗               | ✓          |
 
-features in process
-- [ ] generate JSTree out of javascript
+# features in process
+- [x] generate JSTree out of javascript
   - ESTree + type annotations
 - [ ] index.d.ts file with generics for typescript
 - [ ] jstoGLSL transpiler
-  - generate valid glsl code
-  - glsl polyfills
-    - modulo as arithmetic operator
-    - destruct
-    - functional structs
+  - [x] generate valid glsl code
+  - [ ] glsl polyfills
+    - [x] modulo as arithmetic operator
+    - [ ] destruct
+    - [ ] functional structs
+    - [ ] inline functions for map, reduce, filter
 - [ ] jstoGLSL simulator
-  - there are some js-glsl simulator out there, have to evaluate them
+  - [ ] there are some js-glsl simulator out there, have to evaluate them
+  - [ ] quaternion rotate as function
+  - [ ] vector arithmetic support
 
 in future
 - [ ] jstoWASM transpiler 
@@ -48,3 +51,9 @@ in future
   use decompiler to compare https://v8.dev/blog/wasm-decompile
 - [ ] jstoWASM simulator
 - [ ] what other languages do we need?
+
+#JSTree extended from ESTree
+
+`typeAnnotation` for Literals and Identifiers
+
+`returnType` for Functions
