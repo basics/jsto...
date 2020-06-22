@@ -14,22 +14,23 @@ but with types it can be transpiled to other languages, too.
 a type checker is in process, too. there will be a simple checking without type inference, 
 this can be archived with typescript, but not at runtime.
 
+| environment              | jsto... checker | typescript |
+| ------------------------ | :-------------: | :--------: |
+| run time                 |        ✓        |     ✗      |
+| build time               |        ✓        |     ✓      |
+| IDE time (the best time) |        ✗        |     ✓      |
 
-| environment               | jsto... checker | typescript |
-| --------------------------|:---------------:|:----------:|
-| run time                  | ✓               | ✗          |
-| build time                | ✓               | ✓          |
-| IDE time (the best time)  | ✗               | ✓          |
-
-| typesafe  | jsto... checker | typescript |
-| ----------|:---------------:|:----------:|
-| functions | ✓               | ✓          |
-| arguments | ✓               | ✓          |
-| classes   | ✗               | ✓          |
-| methods   | ✗               | ✓          |
-| variables | ✗               | ✓          |
+| typesafe   | jsto... checker | typescript |
+| ---------- | :-------------: | :--------: |
+| functions  |        ✓        |     ✓      |
+| arguments  |        ✓        |     ✓      |
+| classes    |        ✓        |     ✓      |
+| attributes |        ✓        |     ✓      |
+| methods    |        ✓        |     ✓      |
+| variables  |        ✗        |     ✓      |
 
 # features in process
+
 - [x] generate JSTree out of javascript
   - ESTree + type annotations
 - [ ] index.d.ts file with generics for typescript
@@ -42,17 +43,18 @@ this can be archived with typescript, but not at runtime.
     - [ ] inline functions for map, reduce, filter
 - [ ] jstoGLSL simulator
   - [ ] there are some js-glsl simulator out there, have to evaluate them
-  - [ ] quaternion rotate as function
+  - [ ] quaternion rotate as function with chaining
   - [ ] vector arithmetic support
 
 in future
+
 - [ ] jstoWASM transpiler 
   inspired by https://github.com/AssemblyScript/assemblyscript
   use decompiler to compare https://v8.dev/blog/wasm-decompile
 - [ ] jstoWASM simulator
 - [ ] what other languages do we need?
 
-#JSTree extended from ESTree
+# JSTree extended from ESTree
 
 `typeAnnotation` for Literals and Identifiers
 
