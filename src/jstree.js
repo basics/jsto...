@@ -104,7 +104,8 @@ function handleNode(node, options) {
 
 export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, ...options } = {}) {
   // TODO: use onToken !!!!
-  const node = handleNode(acorn.parse(input, { ...options, locations, ranges }), { qualifiers, integer, float, string, boolean });
+  const ast = acorn.parse(input, { ...options, locations, ranges });
+  const node = handleNode(ast, { qualifiers, integer, float, string, boolean });
 
   return node;
 }
