@@ -5,6 +5,10 @@ const INNER_DATA = Symbol('inner data');
 let activeArgList;
 let activeArgIndex;
 
+export const string = String;
+export const number = Number;
+export const boolean = Boolean;
+
 export function typ(typeDesc) {
   const { type, def } = extractType(typeDesc);
   if (!type) {
@@ -125,6 +129,9 @@ function checkType(type, expected) {
     return;
   }
   if (expected === Boolean && to === 'boolean') {
+    return;
+  }
+  if (type instanceof expected) {
     return;
   }
   throw new Error(`${expected} function doesn't allow results ${type}`);

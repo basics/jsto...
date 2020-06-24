@@ -44,7 +44,7 @@ this can be archived with typescript, but not at runtime.
 - [ ] jstoGLSL simulator
   - [ ] there are some js-glsl simulator out there, have to evaluate them
   - [ ] quaternion rotate as function with chaining
-  - [ ] vector arithmetic support
+  - [x] vector arithmetic support
 
 in future
 

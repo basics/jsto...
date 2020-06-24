@@ -1,4 +1,5 @@
 import { parse } from '../jstree';
+import { sim } from '../jssim';
 
 const qualifiers = [
   'varying',
@@ -6,6 +7,15 @@ const qualifiers = [
   'attribute',
   'struct'
 ];
+const TREE_SETTINGS = {
+  qualifiers,
+  preserveParens: true,
+  locations: true,
+  integer: 'int',
+  float: 'float',
+  string: '!!StringIsNotSupported!!',
+  boolean: 'bool'
+};
 
 function handleNode(node) {
   const { type } = node;
@@ -192,7 +202,7 @@ function binExp(node) {
 }
 
 function assExp(node) {
-  throwError('Default paramameters not supported in GLSL', node);
+  throwError('AssignmentExpression Default paramameters not supported in GLSL', node);
 }
 
 function getOperator(operator) {
@@ -207,7 +217,10 @@ function expSta(node) {
 }
 
 function assPat(node) {
-  throwError('Default paramameters not supported in GLSL', node);
+  if (node.right) {
+    throwError('AssignmentPattern Default paramameters not supported in GLSL', node);
+  }
+  return `${handleNode(node.left)}`;
 }
 
 function arrFun(node) {
@@ -274,32 +287,45 @@ function handleBody(body, tabCount = 0) {
     .join('\n');
 }
 
-export function buildGLSL(fun) {
+export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
   // console.log('fun', fun.toString());
 
   const str = fun.toString();
 
-  let ast;
+  let node;
+  let code;
+  let text;
   try {
-    ast = parse(str, { preserveParens: true, locations: true, qualifiers, integer: 'int', float: 'float', string: '!!StringIsNotSupported!!', boolean: 'bool' });
+    if (glsl || ast) {
+      node = parse(str, TREE_SETTINGS);
+    }
 
+    if (glsl) {
+      const { body } = node.body[0].expression;
 
-    const { body } = ast.body[0].expression;
+      body.body = body.body.filter(({ type }) => (type !== 'ReturnStatement'));
 
-    let sh = handleBody(body);
+      let sh = handleBody(body);
 
-    sh = sh.split('\n').map((s) => {
-      const last = s[s.length - 1];
-      if (last === '{' || last === '}' || last === ';') {
-        return s;
-      }
-      return `${s};`;
-    }).join('\n');
+      sh = sh.split('\n').map((s) => {
+        const last = s[s.length - 1];
+        if (last === '{' || last === '}' || last === ';') {
+          return s;
+        }
+        return `${s};`;
+      }).join('\n');
 
-    // console.log('\n' + sh + '\n');
-    return `${sh}\n`;
+      // console.log('\n' + sh + '\n');
+      text = `${sh}\n`;
+    }
+
+    if (js) {
+      code = sim(fun, js);
+    }
+
+    return { glsl: text, ast: node, js: code };
   } catch (e) {
-    console.log('ast', ast);
+    console.log('ast', node);
     if (e.line) {
       const allLines = str.split('\n');
       const rest = allLines.slice(0, e.line - 2);
