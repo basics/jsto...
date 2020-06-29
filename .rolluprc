@@ -1,28 +1,76 @@
 const babel = require('rollup-plugin-babel');
 const resolve = require('rollup-plugin-node-resolve');
 const minify = require('rollup-plugin-babel-minify');
+const commonjs = require('rollup-plugin-commonjs');
 
-module.exports = [{
-  input: 'src/index.js',
-  output: {
-    name: 'basics',
-    file: 'lib/bundle.min.js',
-    format: 'umd',
-    exports: 'named',
-    extend: true
-  },
+module.exports = [
+  {
+    input: {
+      'index': 'src/index.js',
+      'glsl': 'src/glsl/index.js'
+    },
+    output: [
+      {
+        dir: './build/esm',
+        exports: 'named',
+        format: 'esm',
+        interop: false
+      }, {
+        dir: './',
+        exports: 'named',
+        format: 'cjs',
+        interop: false
+      }
+    ],
 
-  plugins: [
-    resolve(),
-    babel({
-      babelrc: false,
-      exclude: 'node_modules/**',
-      presets: [['@babel/preset-env', { modules: false }]]
-    }),
-    minify({
-      comments: false,
-      banner: '/* jsto... - MIT License */',
-      bannerNewLine: true
-    })
-  ]
-}];
+    plugins: [
+      babel({
+        babelrc: false,
+        exclude: 'node_modules/**',
+        presets: [['@babel/preset-env', { modules: false }]]
+      }),
+    ]
+  }, ...[
+    {
+      input: 'src/index.js',
+      output: {
+        file: 'bundle.min.js',
+        name: 'basics.jsto'
+      }
+    }, {
+      input: 'src/glsl/index.js',
+      output: {
+        file: 'glsl.min.js',
+        name: 'basics.jsto.glsl'
+      }
+    }
+  ].map((item) => {
+    const format = 'iife';
+    return {
+      input: item.input,
+      output: {
+        file: `./build/${format}/${item.output.file}`,
+        name: item.output.name,
+        format: format,
+        exports: 'named',
+        interop: false
+      },
+      plugins: [
+        babel({
+          babelrc: false,
+          exclude: 'node_modules/**',
+          presets: [['@babel/preset-env', {
+            modules: false
+          }]]
+        }),
+        resolve(),
+        commonjs(),
+        minify({
+          comments: false,
+          banner: '/* jsto... - MIT License */',
+          bannerNewLine: true
+        })
+      ]
+    }
+  })
+];

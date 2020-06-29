@@ -1,14 +1,16 @@
 // impl copied from
-// https://github.com/burg/glsl-simulator/blob/master/lib/runtime/, js
+// https://github.com/burg/glsl-simulator/blob/master/lib/runtime/builtins.js
+
+/* global calc */
 
 export class BuiltIn {
 
   radians(degrees) {
-    return calc(() => degrees / 180 * Math.PI);
+    return calc(() => degrees / (180 * Math.PI));
   }
 
   degrees(radians) {
-    return calc(() => radians / 180 * Math.PI);
+    return calc(() => radians / (180 * Math.PI));
   }
 
   sin(x) {
@@ -41,11 +43,11 @@ export class BuiltIn {
   }
 
   pow(x, y) {
-    return calc(() => Math.pow(x, y));
+    return calc(() => x ** y);
   }
 
   exp(x) {
-    return calc(() => Math.exp(x, y));
+    return calc(() => Math.exp(x));
   }
 
   log(x) {
@@ -53,7 +55,7 @@ export class BuiltIn {
   }
 
   exp2(x) {
-    return calc(() => Math.pow(2, x));
+    return calc(() => 2 ** x);
   }
 
   log2(x) {
@@ -69,11 +71,11 @@ export class BuiltIn {
   }
 
   abs(x) {
-    return calc(() => x >= 0 ? x : -x);
+    return calc(() => (x >= 0 ? x : -x));
   }
 
   sign(x) {
-    return calc(() => x > 0 ? 1 : -1);
+    return calc(() => (x > 0 ? 1 : -1));
   }
 
   floor(x) {
@@ -85,7 +87,7 @@ export class BuiltIn {
   }
 
   fract(x) {
-    return calc(() => x - floor(x));
+    return calc(() => x - Math.floor(x));
   }
 
   min(x, y) {
@@ -99,7 +101,7 @@ export class BuiltIn {
   clamp(x, minVal, maxVal) {
     return calc(() => {
       if (minVal > maxVal) {
-        throw new Error("clamp(): maxVal must be larger than minVal.");
+        throw new Error('clamp(): maxVal must be larger than minVal.');
       }
       return Math.min(Math.max(x, minVal), maxVal);
     });
@@ -110,7 +112,7 @@ export class BuiltIn {
   }
 
   step(edge, x) {
-    return calc(() => x < edge ? 0 : 1);
+    return calc(() => (x < edge ? 0 : 1));
   }
 
   smoothstep(edge0, edge1, x) {
@@ -122,7 +124,7 @@ export class BuiltIn {
 
   length(v) {
     let collect = 0;
-    calc(() => collect += v * v);
+    calc(() => (collect += v * v));
     return Math.sqrt(collect);
   }
 
@@ -160,7 +162,7 @@ export class BuiltIn {
   }
 
   reflect(I, N) {
-    let temp = Builtins.dot(I, N) * 2;
+    let temp = this.dot(I, N) * 2;
     return calc(() => I - N * temp);
   }
 
@@ -169,8 +171,9 @@ export class BuiltIn {
     let temp = this.dot(I, N);
     let k = 1 - eta * eta * (1 - temp * temp);
 
-    if (k < 0)
-      return pc.calc(() => I - I);
+    if (k < 0) {
+      return calc(() => I - I);
+    }
     let r = eta * this.dot(I, N) + Math.sqrt(k);
 
     return calc(() => I * eta - N * r);
