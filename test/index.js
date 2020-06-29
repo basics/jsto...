@@ -75,11 +75,10 @@ describe('function tests', () => {
   });
 
   it('should work with valid void function declarations', () => {
-    let nr;
+    let nr = -1;
     const fn1 = fun((p = typ(number)) => {
 
       nr = p;
-      console.log('hallo welt?!', p, nr);
     });
 
     const res1 = fn1(5);

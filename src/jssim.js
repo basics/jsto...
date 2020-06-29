@@ -1,32 +1,35 @@
+import { BuiltIn } from '../test/glsl/bultin';
+import { readOnlyView } from './utils';
 
-const DUMMY = () => undefined;
-
-const handler = {
-  get({ target, options }, prop) {
-    let res = target[prop];
-    if (!res) {
-
-      const fun = options[prop] || DUMMY;
-
-      res = (...args) => {
-        const [first] = args;
-        if (typeof first === 'function' && prop !== 'calc') {
-          return first;
-        }
-        return fun(...args);
-      };
-
-      target[prop] = res;
-    }
-    return res;
-  },
-  set(obj, prop/* , value */) {
-    throw new Error(`set not implemented :( ${prop}`);
-  }
-};
+let builtIn;
 
 export function sim(fun, options = {}) {
-  const target = {};
-  const global = new Proxy({ options, target }, handler);
-  return fun(global);
+  if (!builtIn) {
+
+    builtIn = new BuiltIn();
+
+    const b = Object.getOwnPropertyNames(BuiltIn.prototype)
+      .filter((name) => (name !== 'constructor'))
+      .map((name) => [name, builtIn[name].bind(builtIn)]);
+
+    const o = Object.entries(options)
+      .map(([name, func]) => (
+        [name, (...args) => {
+          const [first] = args;
+          if (typeof first === 'function' && name !== 'calc') {
+            return first;
+          }
+          return func(...args.map((arg) => readOnlyView(arg)));
+        }]
+      ));
+
+    ([...b, ...o]).forEach(([key, value]) => {
+      if (global[key]) {
+        throw new Error(`${key} is already defined :(`);
+      }
+      global[key] = value;
+    });
+  }
+
+  return fun();
 }
