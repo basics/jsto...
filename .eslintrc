@@ -17,6 +17,8 @@
     "object-curly-newline": "off",
     "max-len": "off",
     "no-else-return": "off",
-    "prefer-const": "off"
+    "prefer-const": "off",
+    "no-return-assign": "off",
+    "class-methods-use-this": "off"
   }
 }

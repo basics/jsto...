@@ -1,6 +1,6 @@
 {
   "name": "@js-basics/jsto...",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "transpile javascript to other languages",
   "main": "./lib/index.js",
   "directories": {
@@ -62,7 +62,8 @@
     "rollup-plugin-babel": "4.4.0",
     "rollup-plugin-babel-minify": "10.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
-    "semantic-release": "17.0.7"
+    "semantic-release": "17.0.7",
+    "rollup-plugin-commonjs": "10.1.0"
   },
   "dependencies": {
     "core-js": "^3.6.5",

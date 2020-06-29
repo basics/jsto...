@@ -1,4 +1,4 @@
-import { BuiltIn } from '../test/glsl/bultin';
+import { BuiltIn } from './glsl/bultin';
 import { readOnlyView } from './utils';
 
 let builtIn;
