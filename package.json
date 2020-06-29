@@ -1,6 +1,6 @@
 {
   "name": "@js-basics/jsto...",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "transpile javascript to other languages",
   "main": "./index.js",
   "module": "./build/esm/index.js",
