@@ -274,21 +274,23 @@ function handleAssign({ init, id }) {
   } else {
     if (init.type === 'ArrowFunctionExpression') {
       typeAnnotation = init.returnType;
+      allocation = handleNode(init);
+    } else if (init.type === 'CallExpression') {
+      typeAnnotation = init.callee.name;
+      allocation = ` = ${typeAnnotation}; ${name} = ${handleNode(init)}`;
+    } else {
+      allocation = handleNode(init);
     }
-    allocation = handleNode(init);
   }
 
   let qualifier = '';
   if (q) {
     qualifier = `${q} `;
   }
-
   return `${qualifier}${typeAnnotation} ${name}${allocation}`;
 }
 
 function handleBody(body, tabCount = 0) {
-  // console.log('handleBody', body);
-  //
   return body.body
     .map(handleNode)
     .map((str) => '\t'.repeat(tabCount) + str)
