@@ -1,4 +1,5 @@
 [![GitHub package version](https://img.shields.io/github/package-json/v/basics/jsto....svg)](https://github.com/basics/jsto...)
+[![npm version](https://img.shields.io/npm/v/@js-basics/jsto....svg)](https://www.npmjs.com/package/@js-basics/jsto...)
 [![license](https://img.shields.io/github/license/basics/jsto....svg)](https://github.com/basics/jsto...)
 
 [![OSX/Linux Build Status](https://travis-ci.org/basics/jsto....svg?branch=master)](https://travis-ci.org/basics/jsto...)
