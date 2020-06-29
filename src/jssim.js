@@ -8,6 +8,8 @@ export function sim(fun, options = {}) {
 
     builtIn = new BuiltIn();
 
+    const glbl = typeof window === 'undefined' ? global : window;
+
     const b = Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
       .map((name) => [name, builtIn[name].bind(builtIn)]);
@@ -24,10 +26,10 @@ export function sim(fun, options = {}) {
       ));
 
     ([...b, ...o]).forEach(([key, value]) => {
-      if (global[key]) {
+      if (glbl[key]) {
         throw new Error(`${key} is already defined :(`);
       }
-      global[key] = value;
+      glbl[key] = value;
     });
   }
 
