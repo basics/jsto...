@@ -210,7 +210,7 @@ function binExp(node) {
 }
 
 function assExp(node) {
-  throwError('AssignmentExpression Default paramameters not supported in GLSL', node);
+  return `${handleNode(node.left)} = ${handleNode(node.right)}`;
 }
 
 function getOperator(operator) {
