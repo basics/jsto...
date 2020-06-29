@@ -7,14 +7,22 @@ const qualifiers = [
   'attribute',
   'struct'
 ];
+// const types = [
+//   'vec2',
+//   'vec3',
+//   'vec4',
+//   'mat3',
+//   'mat4'
+// ];
+
 const TREE_SETTINGS = {
   qualifiers,
   preserveParens: true,
   locations: true,
   integer: 'int',
   float: 'float',
-  string: '!!StringIsNotSupported!!',
-  boolean: 'bool'
+  boolean: 'bool',
+  string: '!!StringIsNotSupported!!'
 };
 
 function handleNode(node) {
@@ -290,13 +298,13 @@ function handleBody(body, tabCount = 0) {
 export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
   // console.log('fun', fun.toString());
 
-  const str = fun.toString();
-
+  let str;
   let node;
   let code;
   let text;
   try {
     if (glsl || ast) {
+      str = fun.toString();
       node = parse(str, TREE_SETTINGS);
     }
 
