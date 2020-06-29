@@ -1,12 +1,11 @@
 {
   "name": "@js-basics/jsto...",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "transpile javascript to other languages",
   "main": "./index.js",
   "module": "./build/esm/index.js",
   "directories": {
-    "example": "examples",
-    "test": "test"
+    "build": "build"
   },
   "scripts": {
     "clean": "rimraf lib",
@@ -20,10 +19,6 @@
     "prepare": "npm run clean && npm run test && npm run build",
     "semantic-release": "semantic-release"
   },
-  "files": [
-    "lib",
-    "src"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/basics/jsto....git"
@@ -31,7 +26,8 @@
   "keywords": [
     "transpiler",
     "types",
-    "javascript"
+    "javascript",
+    "glsl"
   ],
   "license": "MIT",
   "bugs": {
