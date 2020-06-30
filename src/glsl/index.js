@@ -1,5 +1,6 @@
 import { parse } from '../jstree';
 import { sim } from '../jssim';
+import { swizzle } from './swizzle';
 
 const qualifiers = [
   'varying',
@@ -210,7 +211,7 @@ function binExp(node) {
 }
 
 function assExp(node) {
-  return `${handleNode(node.left)} = ${handleNode(node.right)}`;
+  return `${handleNode(node.left)} ${getOperator(node.operator)} ${handleNode(node.right)}`;
 }
 
 function getOperator(operator) {
@@ -258,14 +259,15 @@ function throwError(msg, node) {
   throw error;
 }
 
-function handleAssign({ init, id }) {
+function handleAssign(node) {
+  const { init, id } = node;
   let { name, typeAnnotation, qualifier: q } = id;
 
   let allocation = '';
   if (!init) {
     if (!typeAnnotation) {
       throwError(`
-      no type defined for ${id.name}
+      handleAssign() no type defined for ${id.name}
       ${JSON.stringify(id)}
     `, id);
     }
@@ -386,3 +388,4 @@ export function addErrorHandling(glsl) {
 
   return `${prefix} \n ${nString} \n ${suf}`;
 }
+export { swizzle };
