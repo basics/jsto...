@@ -1,40 +1,42 @@
 // impl copied from
 // https://github.com/burg/glsl-simulator/blob/master/lib/runtime/builtins.js
 
-/* global calc */
-
 export class BuiltIn {
 
+  constructor(calc) {
+    this.calc = calc;
+  }
+
   radians(degrees) {
-    return calc(() => degrees / (180 * Math.PI));
+    return this.calc(() => degrees / (180 * Math.PI));
   }
 
   degrees(radians) {
-    return calc(() => radians / (180 * Math.PI));
+    return this.calc(() => radians / (180 * Math.PI));
   }
 
   sin(x) {
-    return calc(() => Math.sin(x));
+    return this.calc(() => Math.sin(x));
   }
 
   cos(x) {
-    return calc(() => Math.cos(x));
+    return this.calc(() => Math.cos(x));
   }
 
   tan(x) {
-    return calc(() => Math.tan(x));
+    return this.calc(() => Math.tan(x));
   }
 
   asin(x) {
-    return calc(() => Math.asin(x));
+    return this.calc(() => Math.asin(x));
   }
 
   acos(x) {
-    return calc(() => Math.acos(x));
+    return this.calc(() => Math.acos(x));
   }
 
   atan(y, x) {
-    return calc(() => {
+    return this.calc(() => {
       if (x === undefined || x === null) {
         return Math.atan(y);
       }
@@ -43,63 +45,63 @@ export class BuiltIn {
   }
 
   pow(x, y) {
-    return calc(() => x ** y);
+    return this.calc(() => x ** y);
   }
 
   exp(x) {
-    return calc(() => Math.exp(x));
+    return this.calc(() => Math.exp(x));
   }
 
   log(x) {
-    return calc(() => Math.log(x));
+    return this.calc(() => Math.log(x));
   }
 
   exp2(x) {
-    return calc(() => 2 ** x);
+    return this.calc(() => 2 ** x);
   }
 
   log2(x) {
-    return calc(() => Math.log(x) / Math.log(2));
+    return this.calc(() => Math.log(x) / Math.log(2));
   }
 
   sqrt(x) {
-    return calc(() => Math.sqrt(x));
+    return this.calc(() => Math.sqrt(x));
   }
 
   inversesqrt(x) {
-    return calc(() => 1 / Math.sqrt(x));
+    return this.calc(() => 1 / Math.sqrt(x));
   }
 
   abs(x) {
-    return calc(() => (x >= 0 ? x : -x));
+    return this.calc(() => (x >= 0 ? x : -x));
   }
 
   sign(x) {
-    return calc(() => (x > 0 ? 1 : -1));
+    return this.calc(() => (x > 0 ? 1 : -1));
   }
 
   floor(x) {
-    return calc(() => Math.floor(x));
+    return this.calc(() => Math.floor(x));
   }
 
   ceil(x) {
-    return calc(() => Math.ceil(x));
+    return this.calc(() => Math.ceil(x));
   }
 
   fract(x) {
-    return calc(() => x - Math.floor(x));
+    return this.calc(() => x - Math.floor(x));
   }
 
   min(x, y) {
-    return calc(() => Math.min(x, y));
+    return this.calc(() => Math.min(x, y));
   }
 
   max(x, y) {
-    return calc(() => Math.max(x, y));
+    return this.calc(() => Math.max(x, y));
   }
 
   clamp(x, minVal, maxVal) {
-    return calc(() => {
+    return this.calc(() => {
       if (minVal > maxVal) {
         throw new Error('clamp(): maxVal must be larger than minVal.');
       }
@@ -108,15 +110,15 @@ export class BuiltIn {
   }
 
   mix(x, y, alpha) {
-    return calc(() => alpha * x + (1 - alpha) * y);
+    return this.calc(() => alpha * x + (1 - alpha) * y);
   }
 
   step(edge, x) {
-    return calc(() => (x < edge ? 0 : 1));
+    return this.calc(() => (x < edge ? 0 : 1));
   }
 
   smoothstep(edge0, edge1, x) {
-    return calc(() => {
+    return this.calc(() => {
       const t = this.clamp((x - edge0) / (edge1 - edge0), 0, 1);
       return t * t * (3 - 2 * t);
     });
@@ -124,17 +126,17 @@ export class BuiltIn {
 
   length(v) {
     let collect = 0;
-    calc(() => (collect += v * v));
+    this.calc(() => (collect += v * v));
     return Math.sqrt(collect);
   }
 
   distance(x, y) {
-    return this.length(calc(() => x - y));
+    return this.length(this.calc(() => x - y));
   }
 
   dot(x, y) {
     let collect = 0;
-    calc(() => collect += x * y);
+    this.calc(() => collect += x * y);
     return collect;
   }
 
@@ -143,7 +145,7 @@ export class BuiltIn {
     if (len <= Number.EPSILON) {
       return x;
     }
-    return calc(() => x / len);
+    return this.calc(() => x / len);
   }
 
   cross(x, y) {
@@ -158,12 +160,12 @@ export class BuiltIn {
     if (this.dot((Nref, I)) < 0) {
       return N;
     }
-    return calc(() => N * -1);
+    return this.calc(() => N * -1);
   }
 
   reflect(I, N) {
     let temp = this.dot(I, N) * 2;
-    return calc(() => I - N * temp);
+    return this.calc(() => I - N * temp);
   }
 
   // TODO check the correctness
@@ -172,10 +174,10 @@ export class BuiltIn {
     let k = 1 - eta * eta * (1 - temp * temp);
 
     if (k < 0) {
-      return calc(() => I - I);
+      return this.calc(() => I - I);
     }
     let r = eta * this.dot(I, N) + Math.sqrt(k);
 
-    return calc(() => I * eta - N * r);
+    return this.calc(() => I * eta - N * r);
   }
 }
