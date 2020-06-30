@@ -3,20 +3,48 @@ import { buildGLSL } from '../../src/glsl';
 
 describe('glsl tests', () => {
 
-  function vec2Sim(x = 0, y = x) {
-    return { x, y, valueOf() { return 5; } };
-  }
   function calcSim(alg) {
     return `only mocked ${alg()}`;
   }
+
+  class vec2Class {
+    constructor(x = 0, y = x) {
+      this.x = x;
+      this.y = y;
+    }
+    valueOf() {
+      return 5;
+    }
+  }
+
+  class vec3Class {
+    constructor(x = 0, y = x, z = y) {
+      this.x = x;
+      this.y = y;
+      this.z = z;
+    }
+    valueOf() {
+      return 5;
+    }
+  }
+
+  function vec3(x, y, z) {
+    return new vec3Class(x, y, z);
+  }
+
+  function vec2(x, y) {
+    return new vec2Class(x, y);
+  }
+
   const jsOptions = {
-    vec2: vec2Sim,
+    vec3,
+    vec2,
     calc: calcSim
   };
   buildGLSL(() => {}, { glsl: false, js: jsOptions });
 
   it('glsl hello world works.', () => {
-    const shader = () => {
+    const shader = ({ vec2, float, calc }) => {
       let bar = vec2((x = float, y = float) => {
         return vec2(x, y);
       });
@@ -50,5 +78,22 @@ vec2 action(vec2 one, vec2 two) {
     const a = action(result, result);
 
     assert.equal(a, 'only mocked 25');
+  });
+
+  it('glsl builtIn function work.', () => {
+    const shader = ({ vec3, cross }) => {
+      let bar = vec3((x = vec3, y = vec3) => {
+        return cross(x, y);
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(vec3(3, 0, 0), vec3(1, 1, 1));
+    assert.equal(result.x, 0);
+    assert.equal(result.y, -3);
+    assert.equal(result.z, 3);
   });
 });

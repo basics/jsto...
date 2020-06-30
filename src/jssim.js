@@ -1,14 +1,14 @@
-import { BuiltIn } from './glsl/bultin';
+import { BuiltIn } from './glsl/builtin';
 import { readOnlyView } from './utils';
 
-let builtIn;
+let gl;
 
 export function sim(fun, options = {}) {
-  if (!builtIn) {
+  if (!gl) {
 
-    builtIn = new BuiltIn();
+    const builtIn = new BuiltIn(options.calc);
 
-    const glbl = typeof window === 'undefined' ? global : window;
+    const global = {};
 
     const b = Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
@@ -26,12 +26,11 @@ export function sim(fun, options = {}) {
       ));
 
     ([...b, ...o]).forEach(([key, value]) => {
-      if (glbl[key]) {
-        throw new Error(`${key} is already defined :(`);
-      }
-      glbl[key] = value;
+      global[key] = value;
     });
+
+    gl = readOnlyView(global);
   }
 
-  return fun();
+  return fun(gl);
 }

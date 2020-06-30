@@ -21,7 +21,6 @@
     "prefer-const": "off",
     "no-return-assign": "off",
     "class-methods-use-this": "off",
-    "no-lonely-if": "off",
-    "no-restricted-globals": "off"
+    "no-lonely-if": "off"
   }
 }

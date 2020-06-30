@@ -252,8 +252,7 @@ function varDec({ declarations }) {
   return declarations.map(handleAssign).join('; ');
 }
 
-function throwError(msg, node, ...args) {
-  console.warn(msg, node, ...args);
+function throwError(msg, node) {
   const error = new Error(msg);
   error.line = node.loc.start.line;
   throw error;
@@ -330,7 +329,10 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
     }
 
     if (js) {
-      code = sim(fun, js);
+      if (js === true) {
+        js = {};
+      }
+      code = sim(fun, { float: Number, ...js });
     }
 
     return { glsl: text, ast: node, js: code };
