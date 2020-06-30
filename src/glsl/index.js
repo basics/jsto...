@@ -276,7 +276,7 @@ function handleAssign({ init, id }) {
       allocation = handleNode(init);
     } else if (init.type === 'CallExpression') {
       typeAnnotation = init.callee.name;
-      allocation = ` = ${typeAnnotation}; ${name} = ${handleNode(init)}`;
+      allocation = `; ${name} = ${handleNode(init)}`;
     } else {
       allocation = handleNode(init);
     }

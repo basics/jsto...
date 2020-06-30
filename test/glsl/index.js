@@ -33,7 +33,7 @@ vec2 bar(vec2 x, float y) {
 
     const expected = `
 vec2 baz() {
-\tvec2 foo = vec2; foo = vec2(5.0, 1.0);
+\tvec2 foo; foo = vec2(5.0, 1.0);
 \treturn foo;
 }
   `;
