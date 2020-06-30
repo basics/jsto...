@@ -11,7 +11,13 @@ const NOPE_HANDLER = {
   defineProperty: NOPE,
   deleteProperty: NOPE,
   preventExtensions: NOPE,
-  setPrototypeOf: NOPE
+  setPrototypeOf: NOPE,
+  get(target, key) {
+    if (key === PROXY) {
+      return true;
+    }
+    return target[key];
+  }
 };
 
 export function readOnlyView(target) {
@@ -25,7 +31,5 @@ export function readOnlyView(target) {
   if (to === 'number' || to === 'boolean' || to === 'string') {
     return target;
   }
-  const proxy = new Proxy(target, NOPE_HANDLER);
-  proxy[PROXY] = true;
-  return proxy;
+  return new Proxy(target, NOPE_HANDLER);
 }
