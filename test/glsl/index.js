@@ -23,7 +23,7 @@ vec2 bar(vec2 x, float y) {
     assert.equal(glsl.trim(), expected.trim());
   });
 
-  it('glsl inline type handling works.', () => {
+  it('works with glsl inline type', () => {
     const { glsl } = buildGLSL(() => {
       let baz = vec2(() => {
         let foo = vec2(5.0, 1.0);
@@ -51,4 +51,21 @@ vec2 baz() {
       });
     });
   });
+
+  it('works with local operator.', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = (x = vec2) => {
+        x += 5.0;
+      };
+    });
+
+    const expected = `
+void baz(vec2 x) {
+\tx += 5.0;
+}
+  `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
 });

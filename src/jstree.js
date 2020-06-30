@@ -3,7 +3,7 @@ import * as acorn from 'acorn';
 function handleParam(param) {
   const { type, left, right } = param;
   if (type !== 'AssignmentPattern') {
-    throw new Error(`no type defined for ${param}`);
+    throw new Error(`handleParam() no type defined for ${param}`);
   }
   if (right.type === 'Identifier') {
     const typeAnnotation = right.name;
@@ -20,7 +20,7 @@ function handleParams(fn) {
   const params = fn.params.map((param) => {
     const { type, right } = param;
     if (type !== 'AssignmentPattern') {
-      throw new Error(`no type defined for ${param}`);
+      throw new Error(`handleParams() no type defined for ${param}`);
     }
 
     if (right.type === 'CallExpression' && right.callee.name === 'type') {
@@ -69,6 +69,9 @@ function extractType(node, target, options) {
       target.typeAnnotation = string;
     }
     target.newInit = node;
+  } else if (type === 'ArrowFunctionExpression') {
+    target.newInit = handleParams(node);
+    target.newInit.returnType = 'void';
   }
   return target;
 }
