@@ -3,8 +3,12 @@
 
 export class BuiltIn {
 
-  constructor(calc) {
-    this.calc = calc;
+  constructor(options) {
+    this.options = options;
+  }
+
+  calc(alg) {
+    return this.options.calc(alg);
   }
 
   radians(degrees) {
@@ -179,5 +183,46 @@ export class BuiltIn {
     let r = eta * this.dot(I, N) + Math.sqrt(k);
 
     return this.calc(() => I * eta - N * r);
+  }
+
+  texture(sampler, uv) {
+    return sampler.get(this, uv);
+  }
+
+  varying() {
+    return undefined;
+  }
+
+  uniform() {
+    return undefined;
+  }
+
+  vecFactory(args, type, len) {
+    const array = args.reduce((collect, arg) => {
+      this.calc(() => collect.push(+arg));
+      return collect;
+    }, []);
+
+    if (array.length === 1) {
+      const first = array[0];
+      return type(first, first, first, first);
+    }
+
+    if (array.length !== len) {
+      throw new Error('assigned arg count is wrong', args);
+    }
+    return type(...array);
+  }
+
+  vec2(...args) {
+    return this.vecFactory(args, this.options.vec2, 2);
+  }
+
+  vec3(...args) {
+    return this.vecFactory(args, this.options.vec3, 3);
+  }
+
+  vec4(...args) {
+    return this.vecFactory(args, this.options.vec4, 4);
   }
 }
