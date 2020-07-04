@@ -1,0 +1,84 @@
+<html>
+<head>
+  <script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script>
+  <script src="https://unpkg.com/@js-basics/vector/build/iife/bundle.min.js"></script>
+  <script src="https://rawgit.com/aframevr/aframe/master/dist/aframe-master.min.js"></script>
+  <style>
+    .viewport {
+      width: 50%;
+      height: 50%;
+    }
+  </style>
+  <script>
+    const {jsto, vector} = basics;
+    const {buildGLSL} = jsto.glsl;
+    const {point: vec2, vector: vec3, color: vec4, calc} = vector;
+
+    const first = arg => arg;
+
+    buildGLSL(() => {
+      return undefined;
+    }, {
+      js: {
+        calc,
+        vec2,
+        vec3,
+        vec4,
+        varying: first,
+        uniform: first
+      }
+    });
+
+    const {glsl: vertexShader} = buildGLSL(({vec2, vec4, varying}) => {
+      let vUv = varying(vec2);
+
+      let main = () => {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      };
+    });
+    const {glsl: fragmentShader, js: {mainImage}} = buildGLSL(({varying, uniform, float, vec2, vec4, mix, sin}) => {
+      let vUv = varying(vec2);
+      let timeMsec = uniform(float);
+
+      let mainImage = vec4((uv = vec2, time = float) => {
+        let t = float(time / 1000.0);
+
+        return mix(
+          vec4((uv % 0.05) * 20.0, 1.0, 1.0),
+          vec4(vec3(1.0, 0.0, 0.0), 1.0),
+          sin(t)
+        );
+      });
+
+      let main = () => {
+        gl_FragColor = mainImage(vUv, timeMsec);
+      };
+
+      return {mainImage};
+    }, {js: true});
+
+    console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
+
+    AFRAME.registerShader('my-custom', {
+      schema: {
+        color: {type: 'color', is: 'uniform', default: 'red'},
+        opacity: {type: 'number', is: 'uniform', default: 1.0},
+        timeMsec: {type: 'time', is: 'uniform'}
+      },
+      raw: false,
+      vertexShader,
+      fragmentShader
+    });
+  </script>
+</head>
+<body>
+<a-scene class="viewport" embedded>
+  <a-entity camera>
+    <a-plane material="shader:my-custom; color:blue; opacity:0.7; transparent:true" position="0 0 -2" width="10"
+             height="10"></a-plane>
+  </a-entity>
+</a-scene>
+<canvas id="canvas-js" class="viewport"></canvas>
+</body>
+</html>
