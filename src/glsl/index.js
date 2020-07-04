@@ -1,5 +1,7 @@
 import { parse } from '../jstree';
 import { sim } from '../jssim';
+import { BuiltIn } from './builtin';
+import { sampler2D } from './builtin-texture';
 import { swizzle } from './swizzle';
 
 const qualifiers = [
@@ -200,11 +202,14 @@ function memExp(node) {
 }
 
 function binExp(node) {
-  // console.log('binExp', node);
   const { left, operator, right } = node;
 
   if (operator === '%') {
     return `mod(${handleNode(left)}, ${handleNode(right)})`;
+  }
+
+  if (operator === '**') {
+    return `pow(${handleNode(left)}, ${handleNode(right)})`;
   }
 
   return `${handleNode(left)} ${getOperator(operator)} ${handleNode(right)}`;
@@ -334,12 +339,11 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
       if (js === true) {
         js = {};
       }
-      code = sim(fun, { float: Number, ...js });
+      code = sim(fun, { BuiltIn, float: Number, ...js });
     }
 
     return { glsl: text, ast: node, js: code };
   } catch (e) {
-    console.log('ast', node);
     if (e.line) {
       const allLines = str.split('\n');
       const rest = allLines.slice(0, e.line - 2);
@@ -388,4 +392,4 @@ export function addErrorHandling(glsl) {
 
   return `${prefix} \n ${nString} \n ${suf}`;
 }
-export { swizzle };
+export { swizzle, sampler2D };

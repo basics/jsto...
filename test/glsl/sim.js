@@ -112,7 +112,7 @@ vec2 action(vec2 one, vec2 two) {
     assert.equal(result.z, 3);
   });
 
-  it('works fine with glsl swizzle fine.', () => {
+  it('works fine with glsl swizzle.', () => {
     const shader = ({ vec3, vec2 }) => {
       let bar = vec3((x = vec2) => {
         return x.xxy;
@@ -128,4 +128,53 @@ vec2 action(vec2 one, vec2 two) {
     assert.equal(result.y, 3);
     assert.equal(result.z, 1);
   });
+
+  // it('works fine with flexible vec parameters.', () => {
+  //   const shader = ({ vec4, vec3, vec2 }) => {
+  //     let bar = vec3((x = vec2) => {
+  //       return vec4(x.xy, 0.0, 1.0);
+  //     });
+  //     return { bar };
+  //   };
+  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+  //
+  //   const { bar } = js;
+  //
+  //   const result = bar(jsOptions.vec2(3, 1));
+  //   assert.equal(result.x, 3);
+  //   assert.equal(result.y, 3);
+  //   assert.equal(result.z, 0);
+  //   assert.equal(result.w, 1);
+  // });
+
+  // it('works fine with sampler2D from array buffer.', () => {
+  //
+  //   const buffer = new Uint8ClampedArray(2 * 1 * 4);
+  //   // red
+  //   buffer[0] = 255;
+  //   buffer[3] = 255;
+  //
+  //   // green
+  //   buffer[5] = 255;
+  //   buffer[7] = 255;
+  //
+  //   const sampler = sampler2D(buffer, 2, 1);
+  //
+  //   const shader = ({ texture, vec2, vec4 }) => {
+  //     let bar = vec4((image) => {
+  //       return texture(image, vec2(0.0, 0.0));
+  //     });
+  //     return { bar };
+  //   };
+  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+  //
+  //   const { bar } = js;
+  //
+  //   const result = bar(sampler);
+  //   console.log('result', result);
+  //   assert.equal(result.x, 1);
+  //   assert.equal(result.y, 0);
+  //   assert.equal(result.z, 0);
+  //   assert.equal(result.w, 1);
+  // });
 });

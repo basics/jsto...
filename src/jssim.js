@@ -1,33 +1,26 @@
-import { BuiltIn } from './glsl/builtin';
 import { readOnlyView } from './utils';
 
 let gl;
 
-export function sim(fun, options = {}) {
+export function sim(fun, { BuiltIn, ...options } = {}) {
   if (!gl) {
 
-    const builtIn = new BuiltIn(options.calc);
+    const builtIn = new BuiltIn(options);
 
     const global = {};
 
-    const b = Object.getOwnPropertyNames(BuiltIn.prototype)
+    Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
-      .map((name) => [name, builtIn[name].bind(builtIn)]);
-
-    const o = Object.entries(options)
-      .map(([name, func]) => (
-        [name, (...args) => {
-          const [first] = args;
-          if (typeof first === 'function' && name !== 'calc') {
-            return first;
-          }
-          return func(...args.map((arg) => readOnlyView(arg)));
-        }]
-      ));
-
-    ([...b, ...o]).forEach(([key, value]) => {
-      global[key] = value;
-    });
+      .map((name) => [name, (...args) => {
+        const [first] = args;
+        if (typeof first === 'function' && name !== 'calc') {
+          return first;
+        }
+        return builtIn[name](...args.map((arg) => readOnlyView(arg)));
+      }])
+      .forEach(
+        ([key, value]) => global[key] = value
+      );
 
     gl = readOnlyView(global);
   }
