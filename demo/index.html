@@ -1,7 +1,6 @@
 <html>
 <head>
-  <!--script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script-->
-  <script src="../build/iife/glsl.min.js"></script>
+  <script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script>
   <script src="https://unpkg.com/@js-basics/vector/build/iife/bundle.min.js"></script>
   <script src="https://rawgit.com/aframevr/aframe/master/dist/aframe-master.min.js"></script>
   <style>
@@ -16,7 +15,7 @@
   </style>
   <script>
     const {jsto, vector} = basics;
-    const {buildGLSL, sampler2D} = jsto.glsl;
+    const {buildGLSL, renderToCanvas} = jsto.glsl;
     const {point: vec2, vector: vec3, color: vec4, calc} = vector;
 
     const first = arg => arg;
@@ -42,7 +41,7 @@
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       };
     });
-    const {glsl: fragmentShader, js: {mainImage}} = buildGLSL(({calc, varying, uniform, float, vec2, vec3, vec4, mix, sin}) => {
+    const shader = ({calc, varying, uniform, float, vec2, vec3, vec4, mix, sin}) => {
       let vUv = varying(vec2);
       let timeMsec = uniform(float);
 
@@ -54,8 +53,6 @@
           vec4(vec3(1.0, 0.0, 0.0), 1.0),
           sin(t)
         );
-
-        // return vec4(calc(() => (uv % 0.05) * 20.0), 0.0, 1.0);
       });
 
       let main = () => {
@@ -63,7 +60,9 @@
       };
 
       return {mainImage};
-    }, {js: true});
+    };
+
+    const {glsl: fragmentShader, js: { mainImage }} = buildGLSL(shader, {js: true});
 
     AFRAME.registerShader('my-custom', {
       schema: {
@@ -80,36 +79,17 @@
 
     window.addEventListener('load', () => {
       const canvas = document.getElementById('canvas-js');
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-
-
-      const ctx = canvas.getContext('2d');
-      const data = ctx.getImageData(0, 0, w, h);
-      const texture = sampler2D(data.data, w, h);
-      const multi = 4;
 
       setInterval(() => {
 
         const time = Date.now();
-        for (let x = 0; x < w; x += multi) {
-          for (let y = 0; y < h; y += multi) {
-            const uv = vec2(x / w, y / h);
-
-            let color = mainImage(uv, time);
-            color = vec4(color.x, color.y, color.z, 1.0);
-            for (let i = 0; i < multi; i += 1) {
-              for (let j = 0; j < multi; j += 1) {
-                texture.setPixel(x + i, y + j, color);
-              }
-            }
-          }
-        }
-        // console.log('done', (Date.now() - time) / 1000);
+        renderToCanvas(canvas, (u, v) => {
+          let uv = vec2(u, v);
+          let color = mainImage(uv, time);
+          return vec4(color.x, color.y, color.z, 1.0);
+        });
 
         // console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
-
-        ctx.putImageData(data, 0, 0);
       }, 500)
     });
 

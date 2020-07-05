@@ -25,7 +25,8 @@ this can be archived with typescript, but not at runtime.
 | ---------- | :-------------: | :--------: |
 | functions  |        ✓        |     ✓      |
 | arguments  |        ✓        |     ✓      |
-| classes    |        ✓        |     ✓      |
+| prototypes |        ✓        |     ✓      |
+| classes    |        ✗        |     ✗      |
 | attributes |        ✓        |     ✓      |
 | methods    |        ✓        |     ✓      |
 | variables  |        ✗        |     ✓      |
@@ -43,16 +44,16 @@ this can be archived with typescript, but not at runtime.
     - [ ] functional structs
     - [ ] inline functions for map, reduce, filter
 - [ ] jstoGLSL simulator
-  - [ ] there are some js-glsl simulator out there, have to evaluate them
-  - [ ] quaternion rotate as function with chaining
+  - [ ] 
+  - [ ] matrix rotate as function with chaining
   - [x] vector arithmetic support
-
-in future
-
 - [ ] jstoWASM transpiler 
+  - [ ] first iteration implement glsl behavior (vector and matrix) 
   inspired by https://github.com/AssemblyScript/assemblyscript
   use decompiler to compare https://v8.dev/blog/wasm-decompile
 - [ ] jstoWASM simulator
+
+in future
 - [ ] what other languages do we need?
 
 # JSTree extended from ESTree
@@ -60,3 +61,7 @@ in future
 `typeAnnotation` for Literals and Identifiers
 
 `returnType` for Functions
+
+# Demos
+
+[first glsl simulation in javascript](https://unpkg.com/@js-basics/jsto.../demo/index.html)
