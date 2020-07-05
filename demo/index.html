@@ -1,17 +1,22 @@
 <html>
 <head>
-  <script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script>
+  <!--script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script-->
+  <script src="../build/iife/glsl.min.js"></script>
   <script src="https://unpkg.com/@js-basics/vector/build/iife/bundle.min.js"></script>
   <script src="https://rawgit.com/aframevr/aframe/master/dist/aframe-master.min.js"></script>
   <style>
-    .viewport {
+    #canvas-gl {
+      width: 50%;
+      height: 50%;
+    }
+    #canvas-js {
       width: 50%;
       height: 50%;
     }
   </style>
   <script>
     const {jsto, vector} = basics;
-    const {buildGLSL} = jsto.glsl;
+    const {buildGLSL, sampler2D} = jsto.glsl;
     const {point: vec2, vector: vec3, color: vec4, calc} = vector;
 
     const first = arg => arg;
@@ -37,7 +42,7 @@
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       };
     });
-    const {glsl: fragmentShader, js: {mainImage}} = buildGLSL(({varying, uniform, float, vec2, vec4, mix, sin}) => {
+    const {glsl: fragmentShader, js: {mainImage}} = buildGLSL(({calc, varying, uniform, float, vec2, vec3, vec4, mix, sin}) => {
       let vUv = varying(vec2);
       let timeMsec = uniform(float);
 
@@ -45,10 +50,12 @@
         let t = float(time / 1000.0);
 
         return mix(
-          vec4((uv % 0.05) * 20.0, 1.0, 1.0),
+          vec4(calc(() => (uv % 0.05) * 20.0), 1.0, 1.0),
           vec4(vec3(1.0, 0.0, 0.0), 1.0),
           sin(t)
         );
+
+        // return vec4(calc(() => (uv % 0.05) * 20.0), 0.0, 1.0);
       });
 
       let main = () => {
@@ -57,8 +64,6 @@
 
       return {mainImage};
     }, {js: true});
-
-    console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
 
     AFRAME.registerShader('my-custom', {
       schema: {
@@ -70,10 +75,48 @@
       vertexShader,
       fragmentShader
     });
+
+    console.log('fragmentShader', fragmentShader);
+
+    window.addEventListener('load', () => {
+      const canvas = document.getElementById('canvas-js');
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+
+
+      const ctx = canvas.getContext('2d');
+      const data = ctx.getImageData(0, 0, w, h);
+      const texture = sampler2D(data.data, w, h);
+      const multi = 4;
+
+      setInterval(() => {
+
+        const time = Date.now();
+        for (let x = 0; x < w; x += multi) {
+          for (let y = 0; y < h; y += multi) {
+            const uv = vec2(x / w, y / h);
+
+            let color = mainImage(uv, time);
+            color = vec4(color.x, color.y, color.z, 1.0);
+            for (let i = 0; i < multi; i += 1) {
+              for (let j = 0; j < multi; j += 1) {
+                texture.setPixel(x + i, y + j, color);
+              }
+            }
+          }
+        }
+        // console.log('done', (Date.now() - time) / 1000);
+
+        // console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
+
+        ctx.putImageData(data, 0, 0);
+      }, 500)
+    });
+
   </script>
 </head>
 <body>
-<a-scene class="viewport" embedded>
+<a-scene id="canvas-gl" class="viewport" embedded>
   <a-entity camera>
     <a-plane material="shader:my-custom; color:blue; opacity:0.7; transparent:true" position="0 0 -2" width="10"
              height="10"></a-plane>

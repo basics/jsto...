@@ -38,13 +38,13 @@ class Texture2D {
     return builtIn.vec4(buffer[index] / 255, buffer[index + 1] / 255, buffer[index + 2] / 255, buffer[index + 3] / 255);
   }
 
-  setPixel(builtIn, x, y, color) {
+  setPixel(x, y, color) {
     const buffer = this.getBuffer();
     let index = (this.w * y + x) * 4;
-    buffer[index + 0] = color.x * 255.0;
-    buffer[index + 1] = color.y * 255.0;
-    buffer[index + 2] = color.z * 255.0;
-    buffer[index + 3] = color.w * 255.0;
+    buffer[index + 0] = Math.floor(color.x * 255.0);
+    buffer[index + 1] = Math.floor(color.y * 255.0);
+    buffer[index + 2] = Math.floor(color.z * 255.0);
+    buffer[index + 3] = Math.floor(color.w * 255.0);
   }
 
   getBuffer() {
@@ -82,7 +82,7 @@ class Texture2D {
       return 0;
     }
 
-    this.setPixel(builtIn, x0, y0, color);
+    this.setPixel(x0, y0, color);
   }
 }
 
