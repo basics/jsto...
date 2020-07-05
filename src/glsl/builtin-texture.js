@@ -93,3 +93,33 @@ export function sampler2D(source, w, h) {
   }
   return texture;
 }
+
+export function renderToCanvas(canvas, pixelCall) {
+  let group = canvas[SAMPLER2D];
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  if (!group || group.w !== w || group.h !== h) {
+    const ctx = canvas.getContext('2d');
+    const data = ctx.getImageData(0, 0, w, h);
+
+    const texture = sampler2D(data.data, w, h);
+    group = {
+      texture, w, h, data, ctx
+    };
+    canvas[SAMPLER2D] = group;
+  }
+
+  const multi = 10;
+  for (let x = 0; x < w; x += multi) {
+    for (let y = 0; y < h; y += multi) {
+      const color = pixelCall(x / w, y / w);
+      for (let i = 0; i < multi; i += 1) {
+        for (let j = 0; j < multi; j += 1) {
+          group.texture.setPixel(x + i, y + j, color);
+        }
+      }
+    }
+  }
+  group.ctx.putImageData(group.data, 0, 0);
+  // console.log('done', (Date.now() - time) / 1000);
+}
