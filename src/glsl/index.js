@@ -339,7 +339,7 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
       if (js === true) {
         js = {};
       }
-      code = sim(fun, { BuiltIn, float: Number, ...js });
+      code = sim(fun, { BuiltIn, ...js });
     }
 
     return { glsl: text, ast: node, js: code };

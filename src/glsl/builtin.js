@@ -197,6 +197,10 @@ export class BuiltIn {
     return undefined;
   }
 
+  float(nr) {
+    return nr;
+  }
+
   vecFactory(args, type, len) {
     const array = args.reduce((collect, arg) => {
       this.calc(() => collect.push(+arg));
