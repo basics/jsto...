@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import {buildGLSL, sampler2D, swizzle} from '../../src/glsl';
+import {buildGLSL, sampler2D, swizzle } from '../../src/glsl';
 
 describe('glsl tests', () => {
 
