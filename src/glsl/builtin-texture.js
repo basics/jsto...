@@ -1,14 +1,17 @@
 const SAMPLER2D = Symbol('sampler 2d');
 
 class Texture2D {
-  constructor(source, w = source.width, h = source.height) {
+  constructor(source, w = source.width, h = source.height, bilinear = true) {
     this.source = source;
+    this.bilinear = bilinear;
     this.w = w;
     this.h = h;
+
+    this.bufferRef = {};
   }
 
   get(builtIn, pos) {
-    const { w, h } = this;
+    const { w, h, bilinear } = this;
     let x = pos.x * w;
     let y = pos.y * h;
 
@@ -22,6 +25,10 @@ class Texture2D {
     if (Number.isNaN(x0)) {
       console.error(`wtf ${x} ${y}`);
       return 0;
+    }
+
+    if (!bilinear) {
+      return this.getPixel(builtIn, x0, y0);
     }
 
     let changeX = x - x0;
@@ -48,7 +55,7 @@ class Texture2D {
   }
 
   getBuffer() {
-    let { buffer } = this;
+    let { buffer } = this.bufferRef;
     if (!buffer) {
       const { source, w, h } = this;
       if (typeof Image !== 'undefined' && source instanceof Image) {
@@ -62,7 +69,7 @@ class Texture2D {
       } else {
         buffer = source;
       }
-      this.buffer = buffer;
+      this.bufferRef.buffer = buffer;
     }
     return buffer;
   }
@@ -86,10 +93,10 @@ class Texture2D {
   }
 }
 
-export function sampler2D(source, w, h) {
+export function sampler2D(source, w, h, bilinear) {
   let texture = source[SAMPLER2D];
   if (!texture) {
-    texture = new Texture2D(source, w, h);
+    texture = new Texture2D(source, w, h, bilinear);
   }
   return texture;
 }
@@ -121,5 +128,4 @@ export function renderToCanvas(canvas, pixelCall) {
     }
   }
   group.ctx.putImageData(group.data, 0, 0);
-  // console.log('done', (Date.now() - time) / 1000);
 }

@@ -11,12 +11,16 @@ export class BuiltIn {
     return this.options.calc(alg);
   }
 
+  multiply(a, b) {
+    return this.options.multiply(a, b);
+  }
+
   radians(degrees) {
-    return this.calc(() => degrees / (180 * Math.PI));
+    return this.calc(() => (degrees / 180.0) * Math.PI);
   }
 
   degrees(radians) {
-    return this.calc(() => radians / (180 * Math.PI));
+    return this.calc(() => (radians / Math.PI) * 180.0);
   }
 
   sin(x) {
@@ -207,13 +211,17 @@ export class BuiltIn {
       return collect;
     }, []);
 
+    if (!array.length) {
+      return type(0, 0, 0, 0);
+    }
+
     if (array.length === 1) {
       const first = array[0];
       return type(first, first, first, first);
     }
 
-    if (array.length !== len) {
-      throw new Error('assigned arg count is wrong', args);
+    if (array.length < len) {
+      throw new Error(`assigned arg count is not enough, expected ${len} but got ${array.length}`, args);
     }
     return type(...array);
   }
