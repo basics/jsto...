@@ -249,7 +249,10 @@ function calExp(node) {
     return 'discard';
   }
   if (name === 'calc') {
-    return handleNode(args[0].body);
+    return `(${handleNode(args[0].body)})`;
+  }
+  if (name === 'multiply') {
+    return `(${handleNode(args[0])} * ${handleNode(args[1])})`;
   }
   return `${name}(${args.map(handleNode).join(', ')})`;
 }

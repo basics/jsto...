@@ -1,10 +1,14 @@
 import { assert } from 'chai';
-import { buildGLSL, swizzle } from '../../src/glsl';
+import {buildGLSL, sampler2D, swizzle} from '../../src/glsl';
 
 describe('glsl tests', () => {
 
   function calcSim(alg) {
     return `only mocked ${alg()}`;
+  }
+
+  function multiplySim(a, b) {
+    return a.x * b.x;
   }
 
   class vec2Class {
@@ -53,6 +57,7 @@ describe('glsl tests', () => {
   }
 
   const jsOptions = {
+    multiply: multiplySim,
     ...swizzle({ vec2, vec3, vec4 }),
     calc: calcSim
   };
@@ -77,7 +82,7 @@ vec2 bar(float x, float y) {
 \treturn vec2(x, y);
 }
 vec2 action(vec2 one, vec2 two) {
-\treturn one * two;
+\treturn (one * two);
 }
 `;
 
@@ -110,6 +115,29 @@ vec2 action(vec2 one, vec2 two) {
     assert.equal(result.x, 0);
     assert.equal(result.y, -3);
     assert.equal(result.z, 3);
+  });
+
+  it('works fine with multiply.', () => {
+    const shader = ({ vec3, multiply }) => {
+      let bar = vec3((x = vec3, y = vec3) => {
+        return multiply(x, y);
+      });
+      return { bar };
+    };
+    const { js, glsl } = buildGLSL(shader, { js: true });
+
+    const expected = `
+vec3 bar(vec3 x, vec3 y) {
+\treturn (x * y);
+}
+`;
+
+    assert.equal(glsl.trim(), expected.trim());
+
+    const { bar } = js;
+
+    const result = bar(vec3(3, 4, 5), vec3(1, 7, 9));
+    assert.equal(result, 3);
   });
 
   it('works fine with glsl swizzle.', () => {
@@ -147,34 +175,34 @@ vec2 action(vec2 one, vec2 two) {
   //   assert.equal(result.w, 1);
   // });
 
-  // it('works fine with sampler2D from array buffer.', () => {
-  //
-  //   const buffer = new Uint8ClampedArray(2 * 1 * 4);
-  //   // red
-  //   buffer[0] = 255;
-  //   buffer[3] = 255;
-  //
-  //   // green
-  //   buffer[5] = 255;
-  //   buffer[7] = 255;
-  //
-  //   const sampler = sampler2D(buffer, 2, 1);
-  //
-  //   const shader = ({ texture, vec2, vec4 }) => {
-  //     let bar = vec4((image) => {
-  //       return texture(image, vec2(0.0, 0.0));
-  //     });
-  //     return { bar };
-  //   };
-  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
-  //
-  //   const { bar } = js;
-  //
-  //   const result = bar(sampler);
-  //   console.log('result', result);
-  //   assert.equal(result.x, 1);
-  //   assert.equal(result.y, 0);
-  //   assert.equal(result.z, 0);
-  //   assert.equal(result.w, 1);
-  // });
+  it('works fine with sampler2D from array buffer.', () => {
+
+    const buffer = new Uint8ClampedArray(2 * 1 * 4);
+    // red
+    buffer[0] = 255;
+    buffer[3] = 255;
+
+    // green
+    buffer[5] = 255;
+    buffer[7] = 255;
+
+    const sampler = sampler2D(buffer, 2, 1, false);
+
+    const shader = ({ texture, vec2, vec4 }) => {
+      let bar = vec4((image) => {
+        return texture(image, vec2(0.0, 0.0));
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(sampler);
+    console.log('result', result);
+    assert.equal(result.x, 1);
+    assert.equal(result.y, 0);
+    assert.equal(result.z, 0);
+    assert.equal(result.w, 1);
+  });
 });
