@@ -213,7 +213,7 @@ export class BuiltIn {
     const array = args.reduce((collect, arg) => {
       if (typeof arg === 'number') {
         collect.push(arg);
-      } else if (arg) {
+      } else if (!arg) {
         throw new Error(`cant handle undefined arg ${arg}`);
       } else {
         if (typeof arg.x === 'number') {
