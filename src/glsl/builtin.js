@@ -206,13 +206,34 @@ export class BuiltIn {
   }
 
   vecFactory(args, type, len) {
+    if (!args.length) {
+      throw new Error(('empty vector args not supported by glsl'));
+    }
+
     const array = args.reduce((collect, arg) => {
-      this.calc(() => collect.push(+arg));
+      if (typeof arg === 'number') {
+        collect.push(arg);
+      } else if (arg) {
+        throw new Error(`cant handle undefined arg ${arg}`);
+      } else {
+        if (typeof arg.x === 'number') {
+          collect.push(arg.x);
+        }
+        if (typeof arg.y === 'number') {
+          collect.push(arg.y);
+        }
+        if (typeof arg.z === 'number') {
+          collect.push(arg.z);
+        }
+        if (typeof arg.w === 'number') {
+          collect.push(arg.w);
+        }
+      }
       return collect;
     }, []);
 
-    if (!array.length) {
-      return type(0, 0, 0, 0);
+    if (Number.isNaN(array[0])) {
+      throw new Error(('result cant be NaN'));
     }
 
     if (array.length === 1) {
