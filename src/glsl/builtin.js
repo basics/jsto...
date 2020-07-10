@@ -8,7 +8,24 @@ export class BuiltIn {
   }
 
   calc(alg) {
-    return this.options.calc(alg);
+    const { options } = this;
+    const result = options.calc(alg);
+    if (typeof result === 'number') {
+      return result;
+    }
+    if (!result) {
+      throw new Error('calc returned undefined');
+    }
+    if (typeof result.w === 'number') {
+      return options.vec4(result.x, result.y, result.z, result.w);
+    }
+    if (typeof result.z === 'number') {
+      return options.vec3(result.x, result.y, result.z);
+    }
+    if (typeof result.y === 'number') {
+      return options.vec2(result.x, result.y);
+    }
+    throw new Error(`calc unknown type of result ${result}`);
   }
 
   multiply(a, b) {
@@ -157,7 +174,7 @@ export class BuiltIn {
   }
 
   cross(x, y) {
-    return new x.constructor(
+    return this.options.vec3(
       x.y * y.z - x.z * y.y,
       x.z * y.x - x.x * y.z,
       x.x * y.y - x.y * y.x
