@@ -1,10 +1,13 @@
 import { assert } from 'chai';
 import {buildGLSL, sampler2D, swizzle } from '../../src/glsl';
 
+const MOCKED = 777654321;
+
 describe('glsl tests', () => {
 
   function calcSim(alg) {
-    return `only mocked ${alg()}`;
+    alg();
+    return MOCKED;
   }
 
   function multiplySim(a, b) {
@@ -63,7 +66,7 @@ describe('glsl tests', () => {
   };
   buildGLSL(() => {}, { glsl: false, js: jsOptions });
 
-  it('glsl hello world works.', () => {
+  it('glsl hello calc works.', () => {
     const shader = ({ vec2, float, calc }) => {
       let bar = vec2((x = float, y = float) => {
         return vec2(x, y);
@@ -97,7 +100,27 @@ vec2 action(vec2 one, vec2 two) {
 
     const a = action(result, result);
 
-    assert.equal(a, 'only mocked 25');
+    assert.equal(a, MOCKED);
+  });
+
+  it('glsl calc as factory call works.', () => {
+    const shader = ({ vec2, calc }) => {
+      let action = vec2((one = vec2, two = vec2) => {
+        let res = vec2(calc(() => one * two));
+        return res;
+      });
+
+      return { action };
+    };
+    const { js } = buildGLSL(shader, { js: true });
+
+    const { action } = js;
+
+    const result = vec2(1, 2);
+    const a = action(result, result);
+
+    assert.equal(a.x, MOCKED);
+    assert.equal(a.y, MOCKED);
   });
 
   it('works fine with glsl builtIn.', () => {
