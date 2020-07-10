@@ -66,7 +66,32 @@ describe('glsl tests', () => {
   };
   buildGLSL(() => {}, { glsl: false, js: jsOptions });
 
-  it('glsl hello calc works.', () => {
+  it('works glsl vectors.', () => {
+    const shader = ({ vec2 }) => {
+      let bar = vec2(() => {
+        return vec2(vec2(1.0, 2.0));
+      });
+      return { bar };
+    };
+    const { glsl, js } = buildGLSL(shader, { js: true });
+
+    const expected = `
+vec2 bar() {
+\treturn vec2(vec2(1.0, 2.0));
+}
+`;
+
+    assert.equal(glsl.trim(), expected.trim());
+
+    const { bar } = js;
+
+    const result = bar();
+
+    assert.equal(result.x, 1);
+    assert.equal(result.y, 2);
+  });
+
+  it('worlds with calc.', () => {
     const shader = ({ vec2, float, calc }) => {
       let bar = vec2((x = float, y = float) => {
         return vec2(x, y);
@@ -103,7 +128,7 @@ vec2 action(vec2 one, vec2 two) {
     assert.equal(a, MOCKED);
   });
 
-  it('glsl calc as factory call works.', () => {
+  it('works with glsl calc as factory call.', () => {
     const shader = ({ vec2, calc }) => {
       let action = vec2((one = vec2, two = vec2) => {
         let res = vec2(calc(() => one * two));

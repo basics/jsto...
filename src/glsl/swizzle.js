@@ -9,6 +9,9 @@ export function sw(vecs) {
             return res;
           }
           const keyLen = key.length;
+          if (keyLen === 1) {
+            return undefined;
+          }
           if (keyLen === undefined || keyLen < 1 || keyLen > 4) {
             return undefined;
           }
