@@ -2,7 +2,6 @@ import { parse } from '../jstree';
 import { sim } from '../jssim';
 import { BuiltIn } from './builtin';
 import { sampler2D, renderToCanvas } from './builtin-texture';
-import { swizzle } from './swizzle';
 
 const qualifiers = [
   'varying',
@@ -395,4 +394,4 @@ export function addErrorHandling(glsl) {
 
   return `${prefix} \n ${nString} \n ${suf}`;
 }
-export { swizzle, sampler2D, renderToCanvas };
+export { sampler2D, renderToCanvas };
