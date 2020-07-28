@@ -1,37 +1,27 @@
 
-export function sw(vecs) {
-  const factories = vecs.map(
-    (vec) => (x, y, z, w) => (
-      new Proxy(vec(x, y, z, w), {
-        get(target, key) {
-          let res = target[key];
-          if (res !== undefined) {
-            return res;
-          }
-          const keyLen = key.length;
-          if (keyLen === 1) {
-            return undefined;
-          }
-          if (keyLen === undefined || keyLen < 1 || keyLen > 4) {
-            return undefined;
-          }
-
-          let args = key.split('').map((k) => {
-            const v = target[k];
-            if (typeof v !== 'number') {
-              throw new Error(`swizzle no number found behind ${k}`);
-            }
-            return v;
-          });
-          return factories[keyLen - 2].apply(null, args);
-        }
-      })
-    )
-  );
-  return factories;
+function prep(prototype, Class, ...keys) {
+  Object.defineProperty(prototype, keys.join(''), {
+    get() {
+      return new Class(...keys.map((k) => this[k]));
+    }
+  });
 }
 
-export function swizzle(vecs) {
-  const [vec2, vec3, vec4] = sw([vecs.vec2, vecs.vec3, vecs.vec4]);
-  return { vec2, vec3, vec4 };
+function prepare(Class, { Vec2, Vec3, Vec4 }, keys) {
+  const { prototype } = Class;
+
+  keys.forEach((a) => keys.forEach((b) => prep(prototype, Vec2, a, b)));
+
+  keys.forEach((a) => keys.forEach((b) => keys.forEach((c) => prep(prototype, Vec3, a, b, c))));
+
+  keys.forEach((a) => keys.forEach((b) => keys.forEach((c) => keys.forEach((d) => prep(prototype, Vec4, a, b, c, d)))));
+
+}
+
+export function swizzle(options) {
+
+  prepare(options.Vec2, options, ['x', 'y']);
+  prepare(options.Vec3, options, ['x', 'y', 'z']);
+  prepare(options.Vec4, options, ['x', 'y', 'z', 'w']);
+
 }
