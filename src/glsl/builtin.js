@@ -1,31 +1,18 @@
 // impl copied from
 // https://github.com/burg/glsl-simulator/blob/master/lib/runtime/builtins.js
 
+import { swizzle } from './swizzle';
+
 export class BuiltIn {
 
   constructor(options) {
     this.options = options;
+    const { Vec2, Vec3, Vec4 } = options;
+    swizzle({ Vec2, Vec3, Vec4 });
   }
 
   calc(alg) {
-    const { options } = this;
-    const result = options.calc(alg);
-    if (typeof result === 'number') {
-      return result;
-    }
-    if (!result) {
-      throw new Error('calc returned undefined');
-    }
-    if (typeof result.w === 'number') {
-      return options.vec4(result.x, result.y, result.z, result.w);
-    }
-    if (typeof result.z === 'number') {
-      return options.vec3(result.x, result.y, result.z);
-    }
-    if (typeof result.y === 'number') {
-      return options.vec2(result.x, result.y);
-    }
-    throw new Error(`calc unknown type of result ${result}`);
+    return this.options.calc(alg);
   }
 
   multiply(a, b) {
@@ -174,7 +161,7 @@ export class BuiltIn {
   }
 
   cross(x, y) {
-    return this.options.vec3(
+    return this.vec3(
       x.y * y.z - x.z * y.y,
       x.z * y.x - x.x * y.z,
       x.x * y.y - x.y * y.x
@@ -222,7 +209,7 @@ export class BuiltIn {
     return nr;
   }
 
-  vecFactory(args, type, len) {
+  vecFactory(args, Class, len) {
     if (!args.length) {
       throw new Error(('empty vector args not supported by glsl'));
     }
@@ -233,17 +220,12 @@ export class BuiltIn {
       } else if (!arg) {
         throw new Error(`cant handle undefined arg ${arg}`);
       } else {
-        if (typeof arg.x === 'number') {
-          collect.push(arg.x);
-        }
-        if (typeof arg.y === 'number') {
-          collect.push(arg.y);
-        }
-        if (typeof arg.z === 'number') {
-          collect.push(arg.z);
-        }
-        if (typeof arg.w === 'number') {
-          collect.push(arg.w);
+        if (arg instanceof this.options.Vec4) {
+          collect.push(arg.x, arg.y, arg.z, arg.w);
+        } else if (arg instanceof this.options.Vec3) {
+          collect.push(arg.x, arg.y, arg.z);
+        } else if (arg instanceof this.options.Vec2) {
+          collect.push(arg.x, arg.y);
         }
       }
       return collect;
@@ -255,24 +237,24 @@ export class BuiltIn {
 
     if (array.length === 1) {
       const first = array[0];
-      return type(first, first, first, first);
+      return new Class(first, first, first, first);
     }
 
     if (array.length < len) {
       throw new Error(`assigned arg count is not enough, expected ${len} but got ${array.length}`, args);
     }
-    return type(...array);
+    return new Class(...array);
   }
 
   vec2(...args) {
-    return this.vecFactory(args, this.options.vec2, 2);
+    return this.vecFactory(args, this.options.Vec2, 2);
   }
 
   vec3(...args) {
-    return this.vecFactory(args, this.options.vec3, 3);
+    return this.vecFactory(args, this.options.Vec3, 3);
   }
 
   vec4(...args) {
-    return this.vecFactory(args, this.options.vec4, 4);
+    return this.vecFactory(args, this.options.Vec4, 4);
   }
 }

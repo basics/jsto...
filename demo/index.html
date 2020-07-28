@@ -16,21 +16,12 @@
   <script>
     const {jsto, vector} = basics;
     const {buildGLSL, renderToCanvas} = jsto.glsl;
-    const {point: vec2, vector: vec3, color: vec4, calc} = vector;
-
-    const first = arg => arg;
+    const {Point: Vec2, Vector: Vec3, Color: Vec4, calc} = vector;
 
     buildGLSL(() => {
       return undefined;
     }, {
-      js: {
-        calc,
-        vec2,
-        vec3,
-        vec4,
-        varying: first,
-        uniform: first
-      }
+      js: { calc, Vec2, Vec3, Vec4 }
     });
 
     const {glsl: vertexShader} = buildGLSL(({vec2, vec4, varying}) => {
@@ -84,13 +75,13 @@
 
         const time = Date.now();
         renderToCanvas(canvas, (u, v) => {
-          let uv = vec2(u, v);
+          let uv = new Vec2(u, v);
           let color = mainImage(uv, time);
-          return vec4(color.x, color.y, color.z, 1.0);
+          return new Vec4(color.x, color.y, color.z, 1.0);
         });
 
         // console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
-      }, 500)
+      }, 100)
     });
 
   </script>
