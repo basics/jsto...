@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import {buildGLSL, sampler2D, swizzle } from '../../src/glsl';
+import {buildGLSL, sampler2D } from '../../src/glsl';
 
 const MOCKED = 777654321;
 
