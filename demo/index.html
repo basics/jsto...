@@ -77,8 +77,7 @@
         const time = Date.now();
         renderToCanvas(canvas, (u, v) => {
           let uv = new Vec2(u, v);
-          let color = mainImage(uv, time);
-          return new Vec4(color.x, color.y, color.z, 1.0);
+          return mainImage(uv, time);
         });
 
         setTimeout(step, 10);
