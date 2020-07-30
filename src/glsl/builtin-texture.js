@@ -45,13 +45,13 @@ class Texture2D {
     return builtIn.vec4(buffer[index] / 255, buffer[index + 1] / 255, buffer[index + 2] / 255, buffer[index + 3] / 255);
   }
 
-  setPixel(x, y, color) {
+  setPixel(x, y, r, g, b, a) {
     const buffer = this.getBuffer();
     let index = (this.w * y + x) * 4;
-    buffer[index + 0] = Math.floor(color.x * 255.0);
-    buffer[index + 1] = Math.floor(color.y * 255.0);
-    buffer[index + 2] = Math.floor(color.z * 255.0);
-    buffer[index + 3] = Math.floor(color.w * 255.0);
+    buffer[index + 0] = Math.floor(r * 255.0);
+    buffer[index + 1] = Math.floor(g * 255.0);
+    buffer[index + 2] = Math.floor(b * 255.0);
+    buffer[index + 3] = Math.floor(a * 255.0);
   }
 
   getBuffer() {
@@ -119,10 +119,10 @@ export function renderToCanvas(canvas, pixelCall) {
   const multi = 10;
   for (let x = 0; x < w; x += multi) {
     for (let y = 0; y < h; y += multi) {
-      const color = pixelCall(x / w, y / w);
+      const { x: r, y: g, z: b, w: a } = pixelCall(x / w, y / w);
       for (let i = 0; i < multi; i += 1) {
         for (let j = 0; j < multi; j += 1) {
-          group.texture.setPixel(x + i, y + j, color);
+          group.texture.setPixel(x + i, y + j, r, g, b, a);
         }
       }
     }

@@ -8,15 +8,16 @@
       width: 50%;
       height: 50%;
     }
+
     #canvas-js {
       width: 50%;
       height: 50%;
     }
   </style>
   <script>
-    const {jsto, vector} = basics;
-    const {buildGLSL, renderToCanvas} = jsto.glsl;
-    const {Point: Vec2, Vector: Vec3, Color: Vec4, calc} = vector;
+    const { jsto, vector } = basics;
+    const { buildGLSL, renderToCanvas } = jsto.glsl;
+    const { Point: Vec2, Vector: Vec3, Color: Vec4, calc } = vector;
 
     buildGLSL(() => {
       return undefined;
@@ -24,7 +25,7 @@
       js: { calc, Vec2, Vec3, Vec4 }
     });
 
-    const {glsl: vertexShader} = buildGLSL(({vec2, vec4, varying}) => {
+    const { glsl: vertexShader } = buildGLSL(({ vec2, vec4, varying }) => {
       let vUv = varying(vec2);
 
       let main = () => {
@@ -32,7 +33,7 @@
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       };
     });
-    const shader = ({calc, varying, uniform, float, vec2, vec3, vec4, mix, sin}) => {
+    const shader = ({ calc, varying, uniform, float, vec2, vec3, vec4, mix, sin }) => {
       let vUv = varying(vec2);
       let timeMsec = uniform(float);
 
@@ -50,16 +51,16 @@
         gl_FragColor = mainImage(vUv, timeMsec);
       };
 
-      return {mainImage};
+      return { mainImage };
     };
 
-    const {glsl: fragmentShader, js: { mainImage }} = buildGLSL(shader, {js: true});
+    const { glsl: fragmentShader, js: { mainImage } } = buildGLSL(shader, { js: true });
 
     AFRAME.registerShader('my-custom', {
       schema: {
-        color: {type: 'color', is: 'uniform', default: 'red'},
-        opacity: {type: 'number', is: 'uniform', default: 1.0},
-        timeMsec: {type: 'time', is: 'uniform'}
+        color: { type: 'color', is: 'uniform', default: 'red' },
+        opacity: { type: 'number', is: 'uniform', default: 1.0 },
+        timeMsec: { type: 'time', is: 'uniform' }
       },
       raw: false,
       vertexShader,
@@ -71,7 +72,7 @@
     window.addEventListener('load', () => {
       const canvas = document.getElementById('canvas-js');
 
-      setInterval(() => {
+      const step = () => {
 
         const time = Date.now();
         renderToCanvas(canvas, (u, v) => {
@@ -80,19 +81,23 @@
           return new Vec4(color.x, color.y, color.z, 1.0);
         });
 
-        // console.log('test mainImage', mainImage(vec2(0.5, 0.5), 0.5));
-      }, 100)
+        setTimeout(step, 10);
+      };
+
+      setTimeout(step, 10);
     });
 
   </script>
 </head>
+
 <body>
-<a-scene id="canvas-gl" class="viewport" embedded>
-  <a-entity camera>
-    <a-plane material="shader:my-custom; color:blue; opacity:0.7; transparent:true" position="0 0 -2" width="10"
-             height="10"></a-plane>
-  </a-entity>
-</a-scene>
-<canvas id="canvas-js" class="viewport"></canvas>
+  <a-scene id="canvas-gl" class="viewport" embedded>
+    <a-entity camera>
+      <a-plane material="shader:my-custom; color:blue; opacity:0.7; transparent:true" position="0 0 -2" width="10"
+        height="10"></a-plane>
+    </a-entity>
+  </a-scene>
+  <canvas id="canvas-js" class="viewport"></canvas>
 </body>
+
 </html>

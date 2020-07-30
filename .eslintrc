@@ -23,6 +23,10 @@
     "class-methods-use-this": "off",
     "no-lonely-if": "off",
     "max-classes-per-file": "off",
-    "no-prototype-builtins": "off"
+    "no-prototype-builtins": "off",
+    "no-tabs": "off",
+    "no-underscore-dangle": "off",
+    "prefer-spread": "off",
+    "no-shadow": "off"
   }
 }

@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import {buildGLSL, sampler2D } from '../../src/glsl';
+import { buildGLSL, sampler2D } from '../../src/glsl';
 
 const MOCKED = 777654321;
 
@@ -52,7 +52,7 @@ describe('glsl tests', () => {
     Vec2, Vec3, Vec4,
     calc: calcSim
   };
-  buildGLSL(() => {}, { glsl: false, js: jsOptions });
+  buildGLSL(() => { }, { glsl: false, js: jsOptions });
 
   it('works glsl vectors.', () => {
     const shader = ({ vec2 }) => {
@@ -211,6 +211,22 @@ vec3 bar(vec3 x, vec3 y) {
     assert.equal(result.w, 1);
   });
 
+  it('works fine with glsl asin multiple types.', () => {
+    const shader = ({ asin, vec2 }) => {
+      let bar = vec2((x = vec2) => {
+        return asin(x);
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(new Vec2(0.1, 0.9));
+    assert.closeTo(result.x, 0.1001674211615598, 0.00001);
+    assert.closeTo(result.y, 1.1197695149986342, 0.00001);
+  });
+
   //  vec4(calc(() => (uv % 0.05) * 20.0), 1.0, 1.0),
 
   // it('works fine with flexible vec parameters.', () => {
@@ -255,7 +271,6 @@ vec3 bar(vec3 x, vec3 y) {
     const { bar } = js;
 
     const result = bar(sampler);
-    console.log('result', result);
     assert.equal(result.x, 1);
     assert.equal(result.y, 0);
     assert.equal(result.z, 0);
