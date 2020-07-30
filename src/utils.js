@@ -27,8 +27,11 @@ export function readOnlyView(target) {
   if (target && target[PROXY]) {
     return target;
   }
+  if (target instanceof Number) {
+    return target;
+  }
   const to = typeof target;
-  if (to === 'number' || to === 'boolean' || to === 'string') {
+  if (to === 'function' || to === 'number' || to === 'boolean' || to === 'string') {
     return target;
   }
   return new Proxy(target, NOPE_HANDLER);

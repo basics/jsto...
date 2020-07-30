@@ -2,13 +2,19 @@
 // https://github.com/burg/glsl-simulator/blob/master/lib/runtime/builtins.js
 
 import { swizzle } from './swizzle';
+import { prepare, fastCalc } from './fast-calc';
 
+prepare(Number, 1);
 export class BuiltIn {
 
   constructor(options) {
     this.options = options;
     const { Vec2, Vec3, Vec4 } = options;
     swizzle({ Vec2, Vec3, Vec4 });
+
+    prepare(Vec2, 2);
+    prepare(Vec3, 3);
+    prepare(Vec4, 4);
   }
 
   calc(alg) {
@@ -20,135 +26,153 @@ export class BuiltIn {
   }
 
   radians(degrees) {
-    return this.calc(() => (degrees / 180.0) * Math.PI);
+    return fastCalc(
+      (degrees) => (degrees / 180.0) * Math.PI,
+      degrees
+    );
   }
 
   degrees(radians) {
-    return this.calc(() => (radians / Math.PI) * 180.0);
+    return fastCalc(
+      (radians) => (radians / Math.PI) * 180.0,
+      radians
+    );
   }
 
   sin(x) {
-    return this.calc(() => Math.sin(x));
+    return fastCalc(Math.sin, x);
   }
 
   cos(x) {
-    return this.calc(() => Math.cos(x));
+    return fastCalc(Math.cos, x);
   }
 
   tan(x) {
-    return this.calc(() => Math.tan(x));
+    return fastCalc(Math.tan, x);
   }
 
   asin(x) {
-    return this.calc(() => Math.asin(x));
+    return fastCalc(Math.asin, x);
   }
 
   acos(x) {
-    return this.calc(() => Math.acos(x));
+    return fastCalc(Math.acos, x);
   }
 
   atan(y, x) {
-    return this.calc(() => {
+    return fastCalc((y, x) => {
       if (x === undefined || x === null) {
         return Math.atan(y);
       }
       return Math.atan2(y, x);
-    });
+    }, y, x);
   }
 
   pow(x, y) {
-    return this.calc(() => x ** y);
+    return fastCalc(
+      (x, y) => x ** y,
+      x, y
+    );
   }
 
   exp(x) {
-    return this.calc(() => Math.exp(x));
+    return fastCalc(Math.exp, x);
   }
 
   log(x) {
-    return this.calc(() => Math.log(x));
+    return fastCalc(Math.log, x);
   }
 
   exp2(x) {
-    return this.calc(() => 2 ** x);
+    return fastCalc(
+      (x) => 2 ** x,
+      x
+    );
   }
 
   log2(x) {
-    return this.calc(() => Math.log(x) / Math.log(2));
+    return fastCalc(
+      (x) => Math.log(x) / Math.log(2),
+      x
+    );
   }
 
   sqrt(x) {
-    return this.calc(() => Math.sqrt(x));
+    return fastCalc((x) => Math.sqrt(x), x);
   }
 
   inversesqrt(x) {
-    return this.calc(() => 1 / Math.sqrt(x));
+    return fastCalc((x) => 1 / Math.sqrt(x), x);
   }
 
   abs(x) {
-    return this.calc(() => (x >= 0 ? x : -x));
+    return fastCalc((x) => (x >= 0 ? x : -x), x);
   }
 
   sign(x) {
-    return this.calc(() => (x > 0 ? 1 : -1));
+    return fastCalc((x) => (x > 0 ? 1 : -1), x);
   }
 
   floor(x) {
-    return this.calc(() => Math.floor(x));
+    return fastCalc(Math.floor, x);
   }
 
   ceil(x) {
-    return this.calc(() => Math.ceil(x));
+    return fastCalc(Math.ceil, x);
   }
 
   fract(x) {
-    return this.calc(() => x - Math.floor(x));
+    return fastCalc((x) => x - Math.floor(x), x);
   }
 
   min(x, y) {
-    return this.calc(() => Math.min(x, y));
+    return fastCalc(Math.min, x, y);
   }
 
   max(x, y) {
-    return this.calc(() => Math.max(x, y));
+    return fastCalc(Math.max, x, y);
   }
 
   clamp(x, minVal, maxVal) {
-    return this.calc(() => {
+    return fastCalc((x, minVal, maxVal) => {
       if (minVal > maxVal) {
         throw new Error('clamp(): maxVal must be larger than minVal.');
       }
       return Math.min(Math.max(x, minVal), maxVal);
-    });
+    }, x, minVal, maxVal);
   }
 
   mix(x, y, alpha) {
-    return this.calc(() => alpha * x + (1 - alpha) * y);
+    return fastCalc(
+      (x, y, alpha) => alpha * x + (1 - alpha) * y,
+      x, y, alpha
+    );
   }
 
   step(edge, x) {
-    return this.calc(() => (x < edge ? 0 : 1));
+    return fastCalc((edge, x) => (x < edge ? 0 : 1), edge, x);
   }
 
   smoothstep(edge0, edge1, x) {
-    return this.calc(() => {
+    return fastCalc((edge0, edge1, x) => {
       const t = this.clamp((x - edge0) / (edge1 - edge0), 0, 1);
       return t * t * (3 - 2 * t);
-    });
+    }, edge0, edge1, x);
   }
 
   length(v) {
     let collect = 0;
-    this.calc(() => (collect += v * v));
+    fastCalc((v) => (collect += v * v), v);
     return Math.sqrt(collect);
   }
 
   distance(x, y) {
-    return this.length(this.calc(() => x - y));
+    return this.length(fastCalc((x, y) => x - y, x, y));
   }
 
   dot(x, y) {
     let collect = 0;
-    this.calc(() => collect += x * y);
+    fastCalc((x, y) => collect += x * y, x, y);
     return collect;
   }
 
@@ -157,7 +181,7 @@ export class BuiltIn {
     if (len <= Number.EPSILON) {
       return x;
     }
-    return this.calc(() => x / len);
+    return fastCalc((x) => x / len, x);
   }
 
   cross(x, y) {
@@ -169,15 +193,15 @@ export class BuiltIn {
   }
 
   faceforward(N, I, Nref) {
-    if (this.dot((Nref, I)) < 0) {
+    if (this.dot(Nref, I) < 0) {
       return N;
     }
-    return this.calc(() => N * -1);
+    return fastCalc((N) => N * -1, N);
   }
 
   reflect(I, N) {
     let temp = this.dot(I, N) * 2;
-    return this.calc(() => I - N * temp);
+    return fastCalc((I, N, temp) => I - N * temp, I, N, temp);
   }
 
   // TODO check the correctness
@@ -186,11 +210,11 @@ export class BuiltIn {
     let k = 1 - eta * eta * (1 - temp * temp);
 
     if (k < 0) {
-      return this.calc(() => I - I);
+      return fastCalc((I) => I - I, I);
     }
     let r = eta * this.dot(I, N) + Math.sqrt(k);
 
-    return this.calc(() => I * eta - N * r);
+    return fastCalc((I, N, eta, r) => I * eta - N * r, I, N, eta, r);
   }
 
   texture(sampler, uv) {
@@ -210,26 +234,28 @@ export class BuiltIn {
   }
 
   vecFactory(args, Class, len) {
-    if (!args.length) {
+    const argsLen = args.length;
+    if (!argsLen) {
       throw new Error(('empty vector args not supported by glsl'));
     }
 
-    const array = args.reduce((collect, arg) => {
+    const array = [];
+    for (let i = 0; i < argsLen; i += 1) {
+      const arg = args[i];
       if (typeof arg === 'number') {
-        collect.push(arg);
+        array.push(arg);
       } else if (!arg) {
         throw new Error(`cant handle undefined arg ${arg}`);
       } else {
         if (arg instanceof this.options.Vec4) {
-          collect.push(arg.x, arg.y, arg.z, arg.w);
+          array.push(arg.x, arg.y, arg.z, arg.w);
         } else if (arg instanceof this.options.Vec3) {
-          collect.push(arg.x, arg.y, arg.z);
+          array.push(arg.x, arg.y, arg.z);
         } else if (arg instanceof this.options.Vec2) {
-          collect.push(arg.x, arg.y);
+          array.push(arg.x, arg.y);
         }
       }
-      return collect;
-    }, []);
+    }
 
     if (Number.isNaN(array[0])) {
       throw new Error(('result cant be NaN'));
@@ -241,7 +267,7 @@ export class BuiltIn {
     }
 
     if (array.length < len) {
-      throw new Error(`assigned arg count is not enough, expected ${len} but got ${array.length}`, args);
+      throw new Error(`assigned arg count is not enough, expected ${len} but got ${array.length}`);
     }
     return new Class(...array);
   }
