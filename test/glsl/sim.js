@@ -153,29 +153,6 @@ vec2 action(vec2 one, vec2 two) {
     assert.equal(result.z, 3);
   });
 
-  it('works fine with multiply.', () => {
-    const shader = ({ vec3, multiply }) => {
-      let bar = vec3((x = vec3, y = vec3) => {
-        return multiply(x, y);
-      });
-      return { bar };
-    };
-    const { js, glsl } = buildGLSL(shader, { js: true });
-
-    const expected = `
-vec3 bar(vec3 x, vec3 y) {
-\treturn (x * y);
-}
-`;
-
-    assert.equal(glsl.trim(), expected.trim());
-
-    const { bar } = js;
-
-    const result = bar(new Vec3(3, 4, 5), new Vec3(1, 7, 9));
-    assert.equal(result, 3);
-  });
-
   it('works fine with glsl swizzle.', () => {
     const shader = ({ vec3, vec2 }) => {
       let bar = vec3((x = vec2) => {
@@ -275,5 +252,39 @@ vec3 bar(vec3 x, vec3 y) {
     assert.equal(result.y, 0);
     assert.equal(result.z, 0);
     assert.equal(result.w, 1);
+  });
+
+  it('works fine even with debug statements', () => {
+
+    let warnRes;
+    const warn = (arg) => warnRes = arg;
+
+    const shader = ({ vec4, vec2 }) => {
+      let bar = vec4((x = vec2) => {
+        warn(`warning: ${x.x.toPrecision(8)}`);
+        return vec4(x, 1.0, 1.0);
+      });
+      return { bar };
+    };
+    const { js, glsl } = buildGLSL(shader, { js: true });
+
+    const { bar } = js;
+
+    const expected = `
+vec4 bar(vec2 x) {
+\t/* warn statement */
+\treturn vec4(x, 1.0, 1.0);
+}
+`;
+
+    assert.equal(glsl.trim(), expected.trim());
+
+    const result = bar(new Vec2(3, 2));
+    assert.equal(result.x, 3);
+    assert.equal(result.y, 2);
+    assert.equal(result.z, 1);
+    assert.equal(result.w, 1);
+
+    assert.equal(warnRes, 'warning: 3.0000000');
   });
 });
