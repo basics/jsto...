@@ -1,4 +1,5 @@
 <html>
+
 <head>
   <script src="https://unpkg.com/@js-basics/jsto.../build/iife/glsl.min.js"></script>
   <script src="https://unpkg.com/@js-basics/vector/build/iife/bundle.min.js"></script>
@@ -73,17 +74,18 @@
       const canvas = document.getElementById('canvas-js');
 
       const step = () => {
-
+        let uv = new Vec2(0.0, 0.0);
         const time = Date.now();
         renderToCanvas(canvas, (u, v) => {
-          let uv = new Vec2(u, v);
+          uv.x = u;
+          uv.y = v;
           return mainImage(uv, time);
         });
 
         setTimeout(step, 10);
       };
 
-      setTimeout(step, 10);
+      step();
     });
 
   </script>

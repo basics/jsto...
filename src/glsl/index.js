@@ -3,6 +3,8 @@ import { sim } from '../jssim';
 import { BuiltIn } from './builtin';
 import { sampler2D, renderToCanvas } from './builtin-texture';
 
+const LINE = Symbol('Line');
+
 const qualifiers = [
   'varying',
   'uniform',
@@ -250,8 +252,17 @@ function calExp(node) {
   if (name === 'calc') {
     return `(${handleNode(args[0].body)})`;
   }
-  if (name === 'multiply') {
-    return `(${handleNode(args[0])} * ${handleNode(args[1])})`;
+  if (name === 'debug') {
+    return '/* debug statement */';
+  }
+  if (name === 'log') {
+    return '/* log statement */';
+  }
+  if (name === 'warn') {
+    return '/* warn statement */';
+  }
+  if (name === 'error') {
+    return '/* error statement */';
   }
   return `${name}(${args.map(handleNode).join(', ')})`;
 }
@@ -262,7 +273,7 @@ function varDec({ declarations }) {
 
 function throwError(msg, node) {
   const error = new Error(msg);
-  error.line = node.loc.start.line;
+  error[LINE] = node.loc.start.line;
   throw error;
 }
 
@@ -327,7 +338,7 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
 
       sh = sh.split('\n').map((s) => {
         const last = s[s.length - 1];
-        if (last === '{' || last === '}' || last === ';') {
+        if (last === '{' || last === '}' || last === ';' || last === '/') {
           return s;
         }
         return `${s};`;
@@ -346,10 +357,10 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
 
     return { glsl: text, ast: node, js: code };
   } catch (e) {
-    if (e.line) {
+    if (e[LINE]) {
       const allLines = str.split('\n');
-      const rest = allLines.slice(0, e.line - 2);
-      const line = allLines[e.line - 1];
+      const rest = allLines.slice(0, e[LINE] - 2);
+      const line = allLines[e[LINE] - 1];
 
       throw new Error(`error at ${e.line}
 ${rest.join('\n')}

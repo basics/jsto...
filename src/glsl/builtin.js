@@ -21,10 +21,6 @@ export class BuiltIn {
     return this.options.calc(alg);
   }
 
-  multiply(a, b) {
-    return this.options.multiply(a, b);
-  }
-
   radians(degrees) {
     return fastCalc(
       (degrees) => (degrees / 180.0) * Math.PI,
@@ -282,5 +278,9 @@ export class BuiltIn {
 
   vec4(...args) {
     return this.vecFactory(args, this.options.Vec4, 4);
+  }
+
+  mat3(ax0, ax1, ax2) {
+    return [ax0, ax1, ax2];
   }
 }

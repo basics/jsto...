@@ -120,9 +120,11 @@ export function renderToCanvas(canvas, pixelCall) {
   for (let x = 0; x < w; x += multi) {
     for (let y = 0; y < h; y += multi) {
       const { x: r, y: g, z: b, w: a } = pixelCall(x / w, y / w);
-      for (let i = 0; i < multi; i += 1) {
-        for (let j = 0; j < multi; j += 1) {
-          group.texture.setPixel(x + i, y + j, r, g, b, a);
+      const maxX = Math.min(w, x + 10);
+      const maxY = Math.min(h, y + 10);
+      for (let i = x; i < maxX; i += 1) {
+        for (let j = y; j < maxY; j += 1) {
+          group.texture.setPixel(i, j, r, g, b, a);
         }
       }
     }
