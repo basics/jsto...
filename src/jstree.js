@@ -20,6 +20,7 @@ function handleParams(fn, options) {
   const params = fn.params.map((param) => {
     const { type, right } = param;
     if (type !== 'AssignmentPattern') {
+      console.error('handleParams() no type defined for', param);
       throw new Error(`handleParams() no type defined for ${param}`);
     }
 
