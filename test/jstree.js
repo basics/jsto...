@@ -185,10 +185,10 @@ describe('jstree implicit tests', () => {
 describe('jstree autodetect primitive tests', () => {
 
   it('extract type via autodetect float', () => {
-    const node = parse('let x = 5.0;', { float: 'SPECIAL'});
+    const node = parse('let x = 5.0;', { float: 'SPECIAL' });
 
     const [declarator] = node.body[0].declarations;
-    const {id, init} = declarator;
+    const { id, init } = declarator;
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'SPECIAL');
@@ -201,7 +201,7 @@ describe('jstree autodetect primitive tests', () => {
     const node = parse('let x = 5;', { integer: 'SPECIAL' });
 
     const [declarator] = node.body[0].declarations;
-    const {id, init} = declarator;
+    const { id, init } = declarator;
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'SPECIAL');
@@ -214,7 +214,7 @@ describe('jstree autodetect primitive tests', () => {
     const node = parse('let x = "5";', { string: 'SPECIAL' });
 
     const [declarator] = node.body[0].declarations;
-    const {id, init} = declarator;
+    const { id, init } = declarator;
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'SPECIAL');
@@ -227,12 +227,37 @@ describe('jstree autodetect primitive tests', () => {
     const node = parse('let x = true;', { boolean: 'SPECIAL' });
 
     const [declarator] = node.body[0].declarations;
-    const {id, init} = declarator;
+    const { id, init } = declarator;
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'SPECIAL');
     assert.equal(id.name, 'x');
     assert.equal(id.qualifier, null);
     assert.equal(init.raw, 'true');
+  });
+
+  it('works with cls', () => {
+
+    const node = parse(`
+      let MyType = cls({
+        fNormal: Vec3,
+        vNormal: type(Vec3)
+      });
+    `);
+
+    const [declarator] = node.body[0].declarations;
+    const { id, type, body: { body: [fNormal, vNormal] } } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.name, 'MyType');
+    assert.equal(type, 'ClassDeclaration');
+
+    assert.equal(fNormal.type, 'PropertyDefinition');
+    assert.equal(fNormal.typeAnnotation, 'Vec3');
+    assert.equal(fNormal.key.name, 'fNormal');
+
+    assert.equal(vNormal.type, 'PropertyDefinition');
+    assert.equal(vNormal.typeAnnotation, 'Vec3');
+    assert.equal(vNormal.key.name, 'vNormal');
   });
 });

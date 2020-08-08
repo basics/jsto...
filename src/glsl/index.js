@@ -283,10 +283,18 @@ function handleAssign(node) {
 
   let allocation = '';
   if (!init) {
+    if (node.type === 'ClassDeclaration') {
+
+      const { body } = node.body;
+      const props = body
+        .map(({ typeAnnotation, key }) => `${typeAnnotation} ${key.name}`)
+        .join('; ');
+      return `struct ${id.name} { ${props}; }`;
+    }
     if (!typeAnnotation) {
       throwError(`
       handleAssign() no type defined for ${id.name}
-      ${JSON.stringify(id)}
+      ${JSON.stringify(node)}
     `, id);
     }
 
