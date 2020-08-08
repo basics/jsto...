@@ -296,7 +296,20 @@ function handleAssign(node) {
       typeAnnotation = init.returnType;
       allocation = handleNode(init);
     } else if (init.type === 'CallExpression') {
-      allocation = `; ${name} = ${handleNode(init)}`;
+
+      switch (typeAnnotation) {
+        case 'float':
+        case 'vec2':
+        case 'vec3':
+        case 'vec4':
+        case 'mat3':
+        case 'mat4':
+          allocation = `; ${name} = ${handleNode(init)}`;
+          break;
+        default:
+          allocation = `; ${name} = ${handleNode(init.arguments[0])}`;
+          break;
+      }
     } else {
       allocation = ` = ${handleNode(init)}`;
     }

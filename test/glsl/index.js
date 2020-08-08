@@ -126,6 +126,24 @@ float baz() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('extract type and init from implicit combinations', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = MyType(() => {
+        let foo = MyType(lastBuffer);
+        return foo;
+      });
+    });
+
+    const expected = `
+MyType baz() {
+\tMyType foo; foo = lastBuffer;
+\treturn foo;
+}
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('works with struct', () => {
     const { glsl } = buildGLSL(() => {
       let MyType = cls({
