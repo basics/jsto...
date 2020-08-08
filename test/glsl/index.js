@@ -41,6 +41,24 @@ vec2 baz() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('works with glsl inline type with idirect default call', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = float(() => {
+        let foo = float(makeFloat());
+        return foo;
+      });
+    });
+
+    const expected = `
+float baz() {
+\tfloat foo; foo = makeFloat();
+\treturn foo;
+}
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('throw an error when trying to use default parameters.', () => {
     assert.throws(() => {
       buildGLSL(() => {

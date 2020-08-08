@@ -253,6 +253,24 @@ describe('jstree implicit tests', () => {
     assert.equal(args[1].value, 2);
   });
 
+  it('extract type and init from implicit VariableDeclarator inside fun with multiple args', () => {
+    const node = parse(`let x = String(() => {
+      let foo = String(createString());
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init: { type, callee } } = declarator;
+
+    assert.equal(type, 'CallExpression');
+    assert.equal(callee.name, 'createString');
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+  });
+
   it('extract typed argument and its "right" from implicit AssignmentPattern', () => {
     const node = parse('let x = String((y = String("foo")) => undefined);');
 
