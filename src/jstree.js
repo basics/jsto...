@@ -93,6 +93,23 @@ function handleNode(node, options) {
     if (!init) {
       throw new Error('no type defined');
     }
+    if (init.type === 'CallExpression' && init.callee.name === 'cls') {
+      const { properties } = init.arguments[0];
+
+      const body = {
+        type: 'ClassBody',
+        body: properties.map(({ key, value }) => {
+          let typeAnnotation;
+          if (value.type === 'CallExpression' && value.callee.name === 'type') {
+            typeAnnotation = value.arguments[0].name;
+          } else {
+            typeAnnotation = value.name;
+          }
+          return { type: 'PropertyDefinition', typeAnnotation, key: { type: 'Identifier', name: key.name } };
+        })
+      };
+      return { id: { ...node.id }, body, type: 'ClassDeclaration' };
+    }
     const { newInit = null, typeAnnotation = null, qualifier = null } = extractType(init, {}, options);
     node.id = { ...node.id, typeAnnotation, qualifier };
     node.init = newInit;

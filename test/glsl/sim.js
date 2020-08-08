@@ -1,5 +1,6 @@
 import { assert } from 'chai';
 import { buildGLSL, sampler2D } from '../../src/glsl';
+import { cls } from '../../src';
 
 const MOCKED = 777654321;
 
@@ -286,5 +287,29 @@ vec4 bar(vec2 x) {
     assert.equal(result.w, 1);
 
     assert.equal(warnRes, 'warning: 3.0000000');
+  });
+
+  it('works fine with glsl struct', () => {
+    const shader = ({ vec2, float }) => {
+      let Foo = cls({
+        bar: vec2,
+        zahl: float
+      });
+      let bar = Foo(() => {
+        let foo = Foo;
+        foo.bar = vec2(1.0, 2.0);
+        foo.zahl = 5.0;
+        return foo;
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar();
+    assert.closeTo(result.bar.x, 1.0, 0.00001);
+    assert.closeTo(result.bar.y, 2.0, 0.00001);
+    assert.closeTo(result.zahl, 5.0, 0.00001);
   });
 });

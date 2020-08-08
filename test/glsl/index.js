@@ -68,4 +68,22 @@ void baz(vec2 x) {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('works with struct', () => {
+    const { glsl } = buildGLSL(() => {
+      let MyType = cls({
+        fNormal: vec3,
+        vNormal: vec3
+      });
+
+      let foo = MyType;
+    });
+
+    const expected = `
+struct MyType { vec3 fNormal; vec3 vNormal; }
+MyType foo;
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
 });

@@ -69,7 +69,15 @@ export function cls(classDesc) {
     });
   });
   function con(...args) {
-    constructor.apply(this, args);
+    if (this instanceof con) {
+      constructor.apply(this, args);
+    } else {
+      const [funDef] = args;
+      if (typeof funDef !== 'function') {
+        throw new Error('only fun definition allowd');
+      }
+      return fun(con, funDef);
+    }
   }
   con.prototype = prototype;
 
@@ -115,6 +123,9 @@ function extractType(type) {
 }
 
 function checkType(type, expected) {
+  if (type === expected) {
+    return;
+  }
   if (expected === undefined) {
     if (type !== undefined) {
       throw new Error(`void function doesn't allow results ${type}`);
