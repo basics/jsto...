@@ -166,6 +166,93 @@ describe('jstree implicit tests', () => {
     assert.equal(arg.name, 'y');
   });
 
+  it('extract type and init from implicit VariableDeclarator without default value', () => {
+    const node = parse('let x = String;');
+
+    const [declarator] = node.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init, undefined);
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String');
+    assert.equal(id.name, 'x');
+    assert.equal(id.qualifier, null);
+  });
+
+  it('extract type and init from explicit VariableDeclarator without default value inside fun', () => {
+    const node = parse(`let x = String(() => {
+      let foo = type(String);
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init, undefined);
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+  });
+
+  it('extract type and init from implicit VariableDeclarator without default value inside fun', () => {
+    const node = parse(`let x = String(() => {
+      let foo = String;
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init, undefined);
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+  });
+
+  it('extract type and init from implicit VariableDeclarator inside fun', () => {
+    const node = parse(`let x = String(() => {
+      let foo = String('bar');
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init.type, 'Literal');
+    assert.equal(init.value, 'bar');
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+  });
+
+  it('extract type and init from implicit VariableDeclarator inside fun with multiple args', () => {
+    const node = parse(`let x = Vec2(() => {
+      let foo = Vec2(3.0, 2.0);
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init: { type, callee, arguments: args } } = declarator;
+
+    assert.equal(type, 'CallExpression');
+    assert.equal(callee.name, 'Vec2');
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'Vec2');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+    assert.equal(args[0].value, 3);
+    assert.equal(args[1].value, 2);
+  });
+
   it('extract typed argument and its "right" from implicit AssignmentPattern', () => {
     const node = parse('let x = String((y = String("foo")) => undefined);');
 
