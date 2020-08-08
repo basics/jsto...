@@ -44,11 +44,10 @@ this can be archived with typescript, but not at runtime.
     - [ ] destruct
     - [ ] functional structs
     - [ ] inline functions for map, reduce, filter
-- [ ] jstoGLSL simulator great for testing
+- [x] jstoGLSL simulator great for testing
   - [x] painting slowly to image buffer
-  - [x] vector arithmetic support
-  - [x] matrix rotate as function
-  - [ ] matrix rotate as function with chaining
+  - [x] vector arithmetic (component wise) support
+  - [-] matrix algebraic support
 
 in future
 - [ ] jstoWASM transpiler great for headless rendering
