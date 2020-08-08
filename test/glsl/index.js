@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { buildGLSL } from '../../src/glsl';
+import { buildGLSL, sampler2D } from '../../src/glsl';
 
 describe('glsl tests', () => {
   it('glsl hello world works.', () => {
@@ -108,6 +108,24 @@ vec2 baz() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('extract type and init from implicit combinations', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = float(() => {
+        let foo = float(texture2D(lastBuffer, x).a * 1000.0);
+        return foo;
+      });
+    });
+
+    const expected = `
+float baz() {
+\tfloat foo = texture2D(lastBuffer, x).a * 1000.0;
+\treturn foo;
+}
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('works with struct', () => {
     const { glsl } = buildGLSL(() => {
       let MyType = cls({
@@ -119,7 +137,7 @@ vec2 baz() {
     });
 
     const expected = `
-struct MyType { vec3 fNormal; vec3 vNormal; }
+struct MyType { vec3 fNormal; vec3 vNormal; };
 MyType foo;
     `;
 

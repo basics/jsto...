@@ -282,7 +282,7 @@ function handleAssign(node) {
       const props = body
         .map(({ typeAnnotation, key }) => `${typeAnnotation} ${key.name}`)
         .join('; ');
-      return `struct ${id.name} { ${props}; }`;
+      return `struct ${id.name} { ${props}; };`;
     }
     if (!typeAnnotation) {
       throwError(`
@@ -298,7 +298,7 @@ function handleAssign(node) {
     } else if (init.type === 'CallExpression') {
       allocation = `; ${name} = ${handleNode(init)}`;
     } else {
-      allocation = handleNode(init);
+      allocation = ` = ${handleNode(init)}`;
     }
   }
 
