@@ -40,6 +40,7 @@ this can be archived with typescript, but not at runtime.
   - [x] generate valid glsl code
   - [ ] glsl polyfills
     - [x] modulo as arithmetic operator
+    - [x] pow as arithmetic operator
     - [ ] symbols and enums
     - [ ] destruct
     - [ ] functional structs
