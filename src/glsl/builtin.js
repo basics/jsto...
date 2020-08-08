@@ -3,6 +3,7 @@
 
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
+import { cls } from '../index';
 
 prepare(Number, 1);
 export class BuiltIn {
@@ -282,5 +283,9 @@ export class BuiltIn {
 
   mat3(ax0, ax1, ax2) {
     return [ax0, ax1, ax2];
+  }
+
+  cls(definition) {
+    return cls(definition);
   }
 }

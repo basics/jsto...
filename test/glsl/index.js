@@ -36,7 +36,7 @@ vec2 baz() {
 \tvec2 foo; foo = vec2(5.0, 1.0);
 \treturn foo;
 }
-  `;
+    `;
 
     assert.equal(glsl.trim(), expected.trim());
   });
@@ -64,6 +64,28 @@ void baz(vec2 x) {
 \tx += 5.0;
 }
   `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works with glsl only type definition type', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = vec2(() => {
+        let foo = vec2;
+        foo.x = 5.0;
+        foo.y = 1.0;
+        return foo;
+      });
+    });
+
+    const expected = `
+vec2 baz() {
+\tvec2 foo;
+\tfoo.x = 5.0;
+\tfoo.y = 1.0;
+\treturn foo;
+}
+    `;
 
     assert.equal(glsl.trim(), expected.trim());
   });

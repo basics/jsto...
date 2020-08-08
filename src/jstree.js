@@ -16,7 +16,7 @@ function handleParam(param) {
   throw new Error(`dont know ${right}`);
 }
 
-function handleParams(fn) {
+function handleParams(fn, options) {
   const params = fn.params.map((param) => {
     const { type, right } = param;
     if (type !== 'AssignmentPattern') {
@@ -29,7 +29,15 @@ function handleParams(fn) {
 
     return handleParam(param);
   });
-  return { ...fn, params };
+
+  let { body } = fn;
+  if (body.type === 'BlockStatement') {
+    body.body = handleNode(body.body, options);
+  } else {
+    body = handleNode(body, options);
+  }
+
+  return { ...fn, body, params };
 }
 
 function extractType(node, target, options) {
@@ -40,7 +48,7 @@ function extractType(node, target, options) {
     if (callee.name === 'fun') {
       const [firstArg, secondArg] = args;
       secondArg.returnType = firstArg.name;
-      target.newInit = handleParams(secondArg);
+      target.newInit = handleParams(secondArg, options);
     } else if (callee.name === 'type') {
       extractType(args[0], target, options);
     } else if (qualifiers.includes(callee.name)) {
@@ -49,10 +57,15 @@ function extractType(node, target, options) {
     } else if (args[0] && (args[0].type === 'ArrowFunctionExpression' || args[0].type === 'FunctionExpression')) {
       const [firstArg] = args;
       firstArg.returnType = callee.name;
-      target.newInit = handleParams(firstArg);
+      target.newInit = handleParams(firstArg, options);
     } else {
-      target.typeAnnotation = callee.name;
-      [target.newInit] = args;
+      const typeAnnotation = callee.name;
+      target.typeAnnotation = typeAnnotation;
+      if (typeAnnotation === integer || typeAnnotation === float || typeAnnotation === string || typeAnnotation === boolean) {
+        [target.newInit] = args;
+      } else {
+        target.newInit = node;
+      }
     }
   } else if (type === 'Identifier') {
     target.typeAnnotation = name;
@@ -70,7 +83,7 @@ function extractType(node, target, options) {
     }
     target.newInit = node;
   } else if (type === 'ArrowFunctionExpression') {
-    target.newInit = handleParams(node);
+    target.newInit = handleParams(node, options);
     target.newInit.returnType = 'void';
   }
   return target;
@@ -93,22 +106,24 @@ function handleNode(node, options) {
     if (!init) {
       throw new Error('no type defined');
     }
-    if (init.type === 'CallExpression' && init.callee.name === 'cls') {
-      const { properties } = init.arguments[0];
+    if (init.type === 'CallExpression') {
+      if (init.callee.name === 'cls') {
+        const { properties } = init.arguments[0];
 
-      const body = {
-        type: 'ClassBody',
-        body: properties.map(({ key, value }) => {
-          let typeAnnotation;
-          if (value.type === 'CallExpression' && value.callee.name === 'type') {
-            typeAnnotation = value.arguments[0].name;
-          } else {
-            typeAnnotation = value.name;
-          }
-          return { type: 'PropertyDefinition', typeAnnotation, key: { type: 'Identifier', name: key.name } };
-        })
-      };
-      return { id: { ...node.id }, body, type: 'ClassDeclaration' };
+        const body = {
+          type: 'ClassBody',
+          body: properties.map(({ key, value }) => {
+            let typeAnnotation;
+            if (value.type === 'CallExpression' && value.callee.name === 'type') {
+              typeAnnotation = value.arguments[0].name;
+            } else {
+              typeAnnotation = value.name;
+            }
+            return { type: 'PropertyDefinition', typeAnnotation, key: { type: 'Identifier', name: key.name } };
+          })
+        };
+        return { id: { ...node.id }, body, type: 'ClassDeclaration' };
+      }
     }
     const { newInit = null, typeAnnotation = null, qualifier = null } = extractType(init, {}, options);
     node.id = { ...node.id, typeAnnotation, qualifier };
