@@ -62,11 +62,7 @@ function extractType(node, target, options) {
     } else {
       const typeAnnotation = callee.name;
       target.typeAnnotation = typeAnnotation;
-      if (typeAnnotation === integer || typeAnnotation === float || typeAnnotation === string || typeAnnotation === boolean) {
-        [target.newInit] = args;
-      } else {
-        target.newInit = node;
-      }
+      target.newInit = node;
     }
   } else if (type === 'Identifier') {
     target.typeAnnotation = name;
