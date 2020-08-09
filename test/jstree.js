@@ -22,8 +22,9 @@ describe('jstree explicit tests', () => {
     const [declarator] = node.body[0].declarations;
     const { id, init } = declarator;
 
-    assert.equal(init.type, 'Literal');
-    assert.equal(init.value, 'foo');
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'String');
+    assert.equal(init.arguments[0].value, 'foo');
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'String');
@@ -120,8 +121,9 @@ describe('jstree implicit tests', () => {
     const [declarator] = node.body[0].declarations;
     const { id, init } = declarator;
 
-    assert.equal(init.type, 'Literal');
-    assert.equal(init.value, 'foo');
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'String');
+    assert.equal(init.arguments[0].value, 'foo');
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'String');
@@ -223,8 +225,9 @@ describe('jstree implicit tests', () => {
     const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
     const { id, init } = declarator;
 
-    assert.equal(init.type, 'Literal');
-    assert.equal(init.value, 'bar');
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'String');
+    assert.equal(init.arguments[0].value, 'bar');
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'String');
@@ -260,10 +263,12 @@ describe('jstree implicit tests', () => {
     });`);
 
     const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
-    const { id, init: { type, callee } } = declarator;
+
+    const { id, init: { type, callee, arguments: args } } = declarator;
 
     assert.equal(type, 'CallExpression');
-    assert.equal(callee.name, 'createString');
+    assert.equal(callee.name, 'String');
+    assert.equal(args[0].callee.name, 'createString');
 
     assert.equal(id.type, 'Identifier');
     assert.equal(id.typeAnnotation, 'String');
