@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { buildGLSL, sampler2D } from '../../src/glsl';
+import { buildGLSL, sampler2D, joinGLSL } from '../../src/glsl';
 import { cls } from '../../src';
 
 const MOCKED = 777654321;
@@ -304,6 +304,35 @@ vec4 bar(vec2 x) {
       return { bar };
     };
     const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar();
+    assert.closeTo(result.bar.x, 1.0, 0.00001);
+    assert.closeTo(result.bar.y, 2.0, 0.00001);
+    assert.closeTo(result.zahl, 5.0, 0.00001);
+  });
+
+  it('works fine with joining glsl snippets', () => {
+    const shader1 = ({ vec2, float }) => {
+      let Foo = cls({
+        bar: vec2,
+        zahl: float
+      });
+      return { Foo };
+    };
+    const shader2 = ({ vec2, Foo }) => {
+      let bar = Foo(() => {
+        let foo = Foo;
+        foo.bar = vec2(1.0, 2.0);
+        foo.zahl = 5.0;
+        return foo;
+      });
+      return { bar };
+    };
+    const one = buildGLSL(shader1, { glsl: false });
+    const two = buildGLSL(shader2, { glsl: false });
+    const { js } = joinGLSL([one, two], { js: true, glsl: false });
 
     const { bar } = js;
 

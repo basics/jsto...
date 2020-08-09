@@ -1,13 +1,14 @@
 import { readOnlyView } from './utils';
 
 let gl;
+let global;
 
-export function sim(fun, { BuiltIn, ...options } = {}) {
+export function sim(fun, { BuiltIn, ...options } = {}, extras) {
   if (!gl) {
 
     const builtIn = new BuiltIn(options);
 
-    const global = {};
+    global = {};
 
     Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
@@ -23,6 +24,10 @@ export function sim(fun, { BuiltIn, ...options } = {}) {
       );
 
     gl = readOnlyView(global);
+  }
+
+  if (extras) {
+    return fun(readOnlyView({ ...global, ...extras }));
   }
 
   return fun(gl);

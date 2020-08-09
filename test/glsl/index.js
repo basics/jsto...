@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { buildGLSL, sampler2D } from '../../src/glsl';
+import { buildGLSL, sampler2D, joinGLSL } from '../../src/glsl';
 
 describe('glsl tests', () => {
   it('glsl hello world works.', () => {
@@ -33,7 +33,7 @@ vec2 bar(vec2 x, float y) {
 
     const expected = `
 vec2 baz() {
-\tvec2 foo; foo = vec2(5.0, 1.0);
+\tvec2 foo = vec2(5.0, 1.0);
 \treturn foo;
 }
     `;
@@ -41,7 +41,7 @@ vec2 baz() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
-  it('works with glsl inline type with idirect default call', () => {
+  it('works with glsl inline type with indirect default call', () => {
     const { glsl } = buildGLSL(() => {
       let baz = float(() => {
         let foo = float(makeFloat());
@@ -51,7 +51,7 @@ vec2 baz() {
 
     const expected = `
 float baz() {
-\tfloat foo; foo = makeFloat();
+\tfloat foo = float(makeFloat());
 \treturn foo;
 }
     `;
@@ -118,7 +118,7 @@ vec2 baz() {
 
     const expected = `
 float baz() {
-\tfloat foo = texture2D(lastBuffer, x).a * 1000.0;
+\tfloat foo = float(texture2D(lastBuffer, x).a * 1000.0);
 \treturn foo;
 }
     `;
@@ -158,6 +158,33 @@ MyType baz() {
 struct MyType { vec3 fNormal; vec3 vNormal; };
 MyType foo;
     `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works with joining chunks', () => {
+    const one = buildGLSL(() => {
+      let foo = uniform(vec2);
+    });
+
+    const two = buildGLSL(() => {
+      let bar = vec2((x = vec2, y = float) => {
+        x = normalize(x);
+        return vec2(x.x, y);
+      });
+    });
+
+    const { glsl } = joinGLSL([one, two]);
+
+    const expected = `
+uniform vec2 foo;
+
+vec2 bar(vec2 x, float y) {
+\tx = normalize(x);
+\treturn vec2(x.x, y);
+}
+    `;
+
 
     assert.equal(glsl.trim(), expected.trim());
   });

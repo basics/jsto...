@@ -4,6 +4,7 @@ import { BuiltIn } from './builtin';
 import { sampler2D, renderToCanvas } from './builtin-texture';
 
 const LINE = Symbol('Line');
+const ORIGINAL = Symbol('Original');
 
 const qualifiers = [
   'varying',
@@ -298,13 +299,15 @@ function handleAssign(node) {
     } else if (init.type === 'CallExpression') {
 
       switch (typeAnnotation) {
+        case 'int':
         case 'float':
+        case 'bool':
         case 'vec2':
         case 'vec3':
         case 'vec4':
         case 'mat3':
         case 'mat4':
-          allocation = `; ${name} = ${handleNode(init)}`;
+          allocation = ` = ${handleNode(init)}`;
           break;
         default:
           allocation = `; ${name} = ${handleNode(init.arguments[0])}`;
@@ -329,7 +332,7 @@ function handleBody(body, tabCount = 0) {
     .join('\n');
 }
 
-export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
+export function buildGLSL(fun, { glsl = true, js = false, ast = false } = {}) {
   // console.log('fun', fun.toString());
 
   let str;
@@ -368,7 +371,7 @@ export function buildGLSL(fun, { glsl = true, js, ast } = {}) {
       code = sim(fun, { BuiltIn, ...js });
     }
 
-    return { glsl: text, ast: node, js: code };
+    return { glsl: text, ast: node, js: code, [ORIGINAL]: fun };
   } catch (e) {
     if (e[LINE]) {
       const allLines = str.split('\n');
@@ -384,6 +387,28 @@ ${e.message}`);
       throw e;
     }
   }
+}
+
+export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
+  const { glsls, js } = args.reduce((mem, { glsl, [ORIGINAL]: original }) => {
+    if (!glsl && glslOn) {
+      glsl = buildGLSL(original, { glsl: true }).glsl;
+    }
+    if (glsl) {
+      mem.glsls.push(glsl);
+    }
+    if (jsOn) {
+      mem.js = sim(original, { BuiltIn }, mem.keys);
+      Object.entries(mem.js).forEach(([key, value]) => {
+        mem.keys[key] = value;
+      });
+    }
+    return mem;
+  }, { glsls: [], js: undefined, keys: {} });
+
+  const glsl = glsls.length ? glsls.join('\n') : undefined;
+
+  return { glsl, js };
 }
 
 export function addErrorHandling(glsl) {
