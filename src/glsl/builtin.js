@@ -226,8 +226,16 @@ export class BuiltIn {
     return undefined;
   }
 
+  int(nr) {
+    return nr;
+  }
+
   float(nr) {
     return nr;
+  }
+
+  bool(b) {
+    return b;
   }
 
   vecFactory(args, Class, len) {
