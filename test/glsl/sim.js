@@ -80,7 +80,7 @@ vec2 bar() {
     assert.equal(result.y, 2);
   });
 
-  it('worlds with calc.', () => {
+  it('works with calc.', () => {
     const shader = ({ vec2, float, calc }) => {
       let bar = vec2((x = float, y = float) => {
         return vec2(x, y);
@@ -290,7 +290,7 @@ vec4 bar(vec2 x) {
   });
 
   it('works fine with glsl struct', () => {
-    const shader = ({ vec2, float }) => {
+    const shader = ({ cls, vec2, float }) => {
       let Foo = cls({
         bar: vec2,
         zahl: float
@@ -314,7 +314,7 @@ vec4 bar(vec2 x) {
   });
 
   it('works fine with joining glsl snippets', () => {
-    const shader1 = ({ vec2, float }) => {
+    const shader1 = ({ cls, vec2, float }) => {
       let Foo = cls({
         bar: vec2,
         zahl: float
@@ -332,7 +332,8 @@ vec4 bar(vec2 x) {
     };
     const one = buildGLSL(shader1, { glsl: false });
     const two = buildGLSL(shader2, { glsl: false });
-    const { js } = joinGLSL([one, two], { js: true, glsl: false });
+    const mixed = joinGLSL([one, two], { js: true, glsl: false });
+    const { js } = mixed;
 
     const { bar } = js;
 
@@ -340,5 +341,29 @@ vec4 bar(vec2 x) {
     assert.closeTo(result.bar.x, 1.0, 0.00001);
     assert.closeTo(result.bar.y, 2.0, 0.00001);
     assert.closeTo(result.zahl, 5.0, 0.00001);
+
+    const shader3 = buildGLSL(({ vec2, bar }) => {
+      let baz = vec2(() => {
+        return bar().bar;
+      });
+      return { baz };
+    });
+
+    const { js: { baz } } = joinGLSL([mixed, shader3], { js: true, glsl: false });
+
+    const result2 = baz();
+    assert.closeTo(result2.x, 1.0, 0.00001);
+    assert.closeTo(result2.y, 2.0, 0.00001);
+  });
+
+  it('works fine with bool', () => {
+    const { js: { bar } } = buildGLSL(({ bool }) => {
+      let bar = bool(() => {
+        return true;
+      });
+      return { bar };
+    }, { js: true });
+    const result = bar();
+    assert.equal(result, true);
   });
 });
