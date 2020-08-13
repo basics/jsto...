@@ -26,9 +26,15 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
     gl = readOnlyView(global);
   }
 
+  let result;
   if (extras) {
-    return fun(readOnlyView({ ...global, ...extras }));
+    result = fun(readOnlyView({ ...global, ...extras }));
+  } else {
+    result = fun(gl);
   }
 
-  return fun(gl);
+  if (!result) {
+    throw new Error('function must return outline');
+  }
+  return result;
 }

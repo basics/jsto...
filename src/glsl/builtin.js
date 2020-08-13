@@ -3,9 +3,15 @@
 
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
-import { cls } from '../index';
+import { cls, typ } from '../index';
 
 prepare(Number, 1);
+
+function checkType(args, type) {
+  if (!args.length) {
+    return typ(type);
+  }
+}
 export class BuiltIn {
 
   constructor(options) {
@@ -226,16 +232,16 @@ export class BuiltIn {
     return undefined;
   }
 
-  int(nr) {
-    return nr;
+  int(...args) {
+    return checkType(args, Number) ?? args[0];
   }
 
-  float(nr) {
-    return nr;
+  float(...args) {
+    return checkType(args, Number) ?? args[0];
   }
 
-  bool(b) {
-    return b;
+  bool(...args) {
+    return checkType(args, Boolean) ?? args[0];
   }
 
   vecFactory(args, Class, len) {
@@ -278,19 +284,19 @@ export class BuiltIn {
   }
 
   vec2(...args) {
-    return this.vecFactory(args, this.options.Vec2, 2);
+    return checkType(args, this.options.Vec2) ?? this.vecFactory(args, this.options.Vec2, 2);
   }
 
   vec3(...args) {
-    return this.vecFactory(args, this.options.Vec3, 3);
+    return checkType(args, this.options.Vec3) ?? this.vecFactory(args, this.options.Vec3, 3);
   }
 
   vec4(...args) {
-    return this.vecFactory(args, this.options.Vec4, 4);
+    return checkType(args, this.options.Vec4) ?? this.vecFactory(args, this.options.Vec4, 4);
   }
 
-  mat3(ax0, ax1, ax2) {
-    return [ax0, ax1, ax2];
+  mat3(...args) {
+    return checkType(args, Array) ?? args;
   }
 
   cls(definition) {

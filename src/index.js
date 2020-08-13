@@ -34,12 +34,15 @@ export function fun(type, func) {
     type = undefined;
   }
   function f(...args) {
-    activeArgList = args;
-    activeArgIndex = 0;
-    const result = func.call(this);
-    activeArgList = undefined;
-    checkType(result, type);
-    return result;
+    try {
+      activeArgList = args;
+      activeArgIndex = 0;
+      const result = func.apply(this);
+      checkType(result, type);
+      return result;
+    } finally {
+      activeArgList = undefined;
+    }
   }
   f[TYPED_FUN] = true;
   return f;

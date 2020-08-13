@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import { buildGLSL, sampler2D, joinGLSL } from '../../src/glsl';
-import { cls } from '../../src';
 
 const MOCKED = 777654321;
 
@@ -53,7 +52,7 @@ describe('glsl tests', () => {
     Vec2, Vec3, Vec4,
     calc: calcSim
   };
-  buildGLSL(() => { }, { glsl: false, js: jsOptions });
+  buildGLSL(() => { return {} }, { glsl: false, js: jsOptions });
 
   it('works glsl vectors.', () => {
     const shader = ({ vec2 }) => {
@@ -82,11 +81,11 @@ vec2 bar() {
 
   it('works with calc.', () => {
     const shader = ({ vec2, float, calc }) => {
-      let bar = vec2((x = float, y = float) => {
+      let bar = vec2((x = float(), y = float()) => {
         return vec2(x, y);
       });
 
-      let action = vec2((one = vec2, two = vec2) => {
+      let action = vec2((one = vec2(), two = vec2()) => {
         return calc(() => one * two);
       });
 
@@ -119,7 +118,7 @@ vec2 action(vec2 one, vec2 two) {
 
   it('works with glsl calc as factory call.', () => {
     const shader = ({ vec2, calc }) => {
-      let action = vec2((one = vec2, two = vec2) => {
+      let action = vec2((one = vec2(), two = vec2()) => {
         let res = vec2(calc(() => one * two));
         return res;
       });
@@ -139,7 +138,7 @@ vec2 action(vec2 one, vec2 two) {
 
   it('works fine with glsl builtIn.', () => {
     const shader = ({ vec3, cross }) => {
-      let bar = vec3((x = vec3, y = vec3) => {
+      let bar = vec3((x = vec3(), y = vec3()) => {
         return cross(x, y);
       });
       return { bar };
@@ -156,7 +155,7 @@ vec2 action(vec2 one, vec2 two) {
 
   it('works fine with glsl swizzle.', () => {
     const shader = ({ vec3, vec2 }) => {
-      let bar = vec3((x = vec2) => {
+      let bar = vec3((x = vec2()) => {
         return x.xxy;
       });
       return { bar };
@@ -173,7 +172,7 @@ vec2 action(vec2 one, vec2 two) {
 
   it('works fine with glsl flexible vector factories.', () => {
     const shader = ({ vec4, vec2 }) => {
-      let bar = vec4((x = vec2) => {
+      let bar = vec4((x = vec2()) => {
         return vec4(x, 1.0, 1.0);
       });
       return { bar };
@@ -191,7 +190,7 @@ vec2 action(vec2 one, vec2 two) {
 
   it('works fine with glsl asin multiple types.', () => {
     const shader = ({ asin, vec2 }) => {
-      let bar = vec2((x = vec2) => {
+      let bar = vec2((x = vec2()) => {
         return asin(x);
       });
       return { bar };
@@ -238,8 +237,8 @@ vec2 action(vec2 one, vec2 two) {
 
     const sampler = sampler2D(buffer, 2, 1, false);
 
-    const shader = ({ texture, vec2, vec4 }) => {
-      let bar = vec4((image) => {
+    const shader = ({ texture, vec2, vec4, sampler2D }) => {
+      let bar = vec4((image = sampler2D()) => {
         return texture(image, vec2(0.0, 0.0));
       });
       return { bar };
@@ -261,7 +260,7 @@ vec2 action(vec2 one, vec2 two) {
     const warn = (arg) => warnRes = arg;
 
     const shader = ({ vec4, vec2 }) => {
-      let bar = vec4((x = vec2) => {
+      let bar = vec4((x = vec2()) => {
         warn(`warning: ${x.x.toPrecision(8)}`);
         return vec4(x, 1.0, 1.0);
       });
@@ -295,9 +294,9 @@ vec4 bar(vec2 x) {
         bar: vec2,
         zahl: float
       });
-      let bar = Foo(() => {
+      let bar = Foo((x = float()) => {
         let foo = Foo;
-        foo.bar = vec2(1.0, 2.0);
+        foo.bar = vec2(x, 2.0);
         foo.zahl = 5.0;
         return foo;
       });
@@ -307,7 +306,7 @@ vec4 bar(vec2 x) {
 
     const { bar } = js;
 
-    const result = bar();
+    const result = bar(1.0);
     assert.closeTo(result.bar.x, 1.0, 0.00001);
     assert.closeTo(result.bar.y, 2.0, 0.00001);
     assert.closeTo(result.zahl, 5.0, 0.00001);
@@ -344,7 +343,7 @@ vec4 bar(vec2 x) {
 
     const shader3 = buildGLSL(({ vec2, bar }) => {
       let baz = vec2(() => {
-        return bar().bar;
+        return bar(1.0).bar;
       });
       return { baz };
     });

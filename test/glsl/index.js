@@ -6,7 +6,7 @@ describe('glsl tests', () => {
     const { glsl } = buildGLSL(() => {
       let foo = uniform(vec2);
 
-      let bar = vec2((x = vec2, y = float) => {
+      let bar = vec2((x = vec2(), y = float()) => {
         x = normalize(x);
         return vec2(x.x, y);
       });
@@ -72,7 +72,7 @@ float baz() {
 
   it('works with local operator.', () => {
     const { glsl } = buildGLSL(() => {
-      let baz = (x = vec2) => {
+      let baz = (x = vec2()) => {
         x += 5.0;
       };
     });
@@ -168,7 +168,7 @@ MyType foo;
     });
 
     const two = buildGLSL(() => {
-      let bar = vec2((x = vec2, y = float) => {
+      let bar = vec2((x = vec2(), y = float()) => {
         x = normalize(x);
         return vec2(x.x, y);
       });
