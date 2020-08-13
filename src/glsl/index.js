@@ -4,7 +4,7 @@ import { BuiltIn } from './builtin';
 import { sampler2D, renderToCanvas } from './builtin-texture';
 
 const LINE = Symbol('Line');
-const ORIGINAL = Symbol('Original');
+const ORIGINALS = Symbol('Originals');
 
 const qualifiers = [
   'varying',
@@ -371,7 +371,7 @@ export function buildGLSL(fun, { glsl = true, js = false, ast = false } = {}) {
       code = sim(fun, { BuiltIn, ...js });
     }
 
-    return { glsl: text, ast: node, js: code, [ORIGINAL]: fun };
+    return { glsl: text, ast: node, js: code, [ORIGINALS]: [fun] };
   } catch (e) {
     if (e[LINE]) {
       const allLines = str.split('\n');
@@ -390,25 +390,33 @@ ${e.message}`);
 }
 
 export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
-  const { glsls, js } = args.reduce((mem, { glsl, [ORIGINAL]: original }) => {
+  const { glsls, js, originals } = args.reduce((mem, { glsl, [ORIGINALS]: originals }) => {
     if (!glsl && glslOn) {
-      glsl = buildGLSL(original, { glsl: true }).glsl;
+      if (originals.length === 1) {
+        glsl = buildGLSL(originals[0], { glsl: true }).glsl;
+      } else {
+        glsl = joinGLSL(originals, { glsl: true }).glsl;
+      }
     }
     if (glsl) {
       mem.glsls.push(glsl);
     }
     if (jsOn) {
-      mem.js = sim(original, { BuiltIn }, mem.keys);
-      Object.entries(mem.js).forEach(([key, value]) => {
-        mem.keys[key] = value;
+      originals.forEach((original) => {
+        mem.js = sim(original, { BuiltIn }, mem.keys);
+
+        Object.entries(mem.js).forEach(([key, value]) => {
+          mem.keys[key] = value;
+        });
       });
     }
+    mem.originals.push(...originals);
     return mem;
-  }, { glsls: [], js: undefined, keys: {} });
+  }, { glsls: [], js: undefined, keys: {}, originals: [] });
 
   const glsl = glsls.length ? glsls.join('\n') : undefined;
 
-  return { glsl, js };
+  return { glsl, js, [ORIGINALS]: originals };
 }
 
 export function addErrorHandling(glsl) {
