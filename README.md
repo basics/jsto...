@@ -47,8 +47,9 @@ this can be archived with typescript, but not at runtime.
     - [ ] inline functions for map, reduce, filter
 - [x] jstoGLSL simulator great for testing
   - [x] painting slowly to image buffer
-  - [x] vector arithmetic (component wise) support
-  - [ ] matrix algebraic support
+  - [x] vector arithmetic (component wise) operator support
+  - [ ] matrix algebraic operator support
+  - [ ] multithreading
 
 in future
 - [ ] jstoWASM transpiler great for headless rendering
