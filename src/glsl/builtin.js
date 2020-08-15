@@ -4,7 +4,9 @@
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
 import { cls, typ } from '../index';
+import { readOnlyView } from '../utils';
 
+const EMPTY = Object.freeze({});
 prepare(Number, 1);
 
 function checkType(args, type) {
@@ -229,7 +231,7 @@ export class BuiltIn {
   }
 
   uniform() {
-    return undefined;
+    return readOnlyView(EMPTY);
   }
 
   int(...args) {

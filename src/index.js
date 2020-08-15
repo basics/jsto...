@@ -145,6 +145,9 @@ function checkType(type, expected) {
   if (expected === Boolean && to === 'boolean') {
     return;
   }
+  if (type.constructor === expected) {
+    return;
+  }
   if (type instanceof expected) {
     return;
   }
