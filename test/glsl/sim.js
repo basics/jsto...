@@ -365,4 +365,51 @@ vec4 bar(vec2 x) {
     const result = bar();
     assert.equal(result, true);
   });
+
+  it('works with set unifom parameter.', () => {
+    const { js: { foo, bar, setParam } } = buildGLSL(({ uniform, calc, vec2 }) => {
+      const foo = uniform(vec2);
+
+      let bar = vec2(() => {
+        return foo;
+      });
+
+      return { foo, bar };
+    }, { js: true });
+
+    setParam(foo, new Vec2(3, 2));
+    const result2 = bar();
+    assert.closeTo(result2.x, 3.0, 0.00001);
+    assert.closeTo(result2.y, 2.0, 0.00001);
+
+  });
+
+  // it('throws an error when trying to change props of an argument.', () => {
+  //   const shader = ({ asin, vec2 }) => {
+  //     let bar = (x = vec2()) => {
+  //       console.log('x???', x);
+  //       x.x = 0.5;
+  //     };
+  //     return { bar };
+  //   };
+  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+  //   const { bar } = js;
+
+  //   assert.throws(() => (bar(new Vec2(0.1, 0.9))));
+  // });
+
+  // it('throws an arrow when assigning wrong type to function.', () => {
+  //   const shader = ({ asin, vec2 }) => {
+  //     let bar = (x = vec2()) => {
+  //       x.x * 5.0;
+  //     };
+  //     return { bar };
+  //   };
+  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+  //   const { bar } = js;
+
+  //   assert.throws(() => (bar(new Vec3(0.1, 0.9, 5.0))));
+  // });
 });

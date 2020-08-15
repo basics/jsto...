@@ -9,8 +9,7 @@ const ORIGINALS = Symbol('Originals');
 const qualifiers = [
   'varying',
   'uniform',
-  'attribute',
-  'struct'
+  'attribute'
 ];
 
 const TREE_SETTINGS = {
