@@ -77,7 +77,6 @@ export function cls(classDesc) {
         if (!type) {
           throw new Error(`no definition found for ${key} in ${types}`);
         }
-        console.log('before checktype', key, type);
         checkType(value, type, `check type for setter of type ${type}`);
         return setInner(this, key, value);
       }
