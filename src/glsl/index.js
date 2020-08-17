@@ -2,6 +2,7 @@ import { parse } from '../jstree';
 import { sim } from '../jssim';
 import { BuiltIn } from './builtin';
 import { sampler2D, renderToCanvas } from './builtin-texture';
+import { readOnlyView } from '../utils';
 
 const LINE = Symbol('Line');
 const ORIGINALS = Symbol('Originals');
@@ -386,7 +387,7 @@ export function buildGLSL(fun, { glsl = true, js = false, ast = false } = {}) {
       code = sim(fun, { BuiltIn, ...js });
     }
 
-    return { glsl: text, ast: node, js: code, [ORIGINALS]: [fun] };
+    return { glsl: text, ast: node, js: readOnlyView(code), [ORIGINALS]: [fun] };
   } catch (e) {
     if (e[LINE]) {
       const allLines = str.split('\n');
@@ -405,7 +406,7 @@ ${e.message}`);
 }
 
 export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
-  const { glsls, js, originals } = args.reduce((mem, { glsl, [ORIGINALS]: originals }) => {
+  const { glsls, js, originals, keys } = args.reduce((mem, { glsl, [ORIGINALS]: originals }) => {
     if (!glsl && glslOn) {
       if (originals.length === 1) {
         glsl = buildGLSL(originals[0], { glsl: true }).glsl;
@@ -430,8 +431,14 @@ export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
   }, { glsls: [], js: undefined, keys: {}, originals: [] });
 
   const glsl = glsls.length ? glsls.join('\n') : undefined;
-
-  return { glsl, js, [ORIGINALS]: originals };
+  if (js) {
+    Object.entries(keys).forEach(([key, value]) => {
+      if (!js[key]) {
+        js[key] = value;
+      }
+    });
+  }
+  return { glsl, js: readOnlyView(js), [ORIGINALS]: originals };
 }
 
 export function addErrorHandling(glsl) {

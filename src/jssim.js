@@ -21,8 +21,6 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
       //       return first;
       //     }
       //     // FIXME: do here the checktype of builtin
-
-
       //     return builtIn[name](...args.map((arg) => readOnlyView(arg)));
       //   };
       //   fn[IS_BUILTIN] = true;
@@ -51,7 +49,7 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
     setSource(uniform, value);
   };
 
-  return readOnlyView(result);
+  return result;
   // const res = {};
   // Object.entries(result)
   //   .forEach(

@@ -338,12 +338,14 @@ vec4 bar(vec2 x) {
     const mixed = joinGLSL([one, two], { js: true, glsl: false });
     const { js } = mixed;
 
-    const { bar } = js;
+    const { bar, Foo } = js;
 
     const result = bar();
     assert.closeTo(result.bar.x, 1.0, 0.00001);
     assert.closeTo(result.bar.y, 2.0, 0.00001);
     assert.closeTo(result.zahl, 5.0, 0.00001);
+
+    assert.isDefined(Foo);
 
     const shader3 = buildGLSL(({ vec2, bar }) => {
       let baz = vec2(() => {
