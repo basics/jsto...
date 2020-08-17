@@ -50,6 +50,7 @@ this can be archived with typescript, but not at runtime.
   - [x] vector arithmetic (component wise) operator support
   - [ ] matrix algebraic operator support
   - [ ] multithreading
+  - [ ] typesafety
 
 in future
 - [ ] jstoWASM transpiler great for headless rendering
