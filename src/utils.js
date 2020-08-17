@@ -11,22 +11,26 @@ export function readOnlyView(target) {
   if (target === undefined || target === null) {
     return target;
   }
-  if (target && target[IS_PROXY]) {
-    return target;
+  if (target !== BLOCKED) {
+    if (target && target[IS_PROXY]) {
+      return target;
+    }
+    const { constructor } = target;
+    if (constructor === Number) {
+      return target;
+    }
+    if (constructor === Boolean) {
+      return target;
+    }
+    if (constructor === String) {
+      return target;
+    }
+    const to = typeof target;
+    if (to === 'function' || to === 'number' || to === 'boolean' || to === 'string') {
+      return target;
+    }
   }
-  if (target instanceof Number) {
-    return target;
-  }
-  if (target instanceof Boolean) {
-    return target;
-  }
-  if (target instanceof String) {
-    return target;
-  }
-  const to = typeof target;
-  if (to === 'function' || to === 'number' || to === 'boolean' || to === 'string') {
-    return target;
-  }
+
   return new Proxy(target, {
     defineProperty: NOPE,
     deleteProperty: NOPE,
@@ -67,4 +71,45 @@ export function setSource(proxy, target) {
   }
   proxy[PROXY] = target;
   return true;
+}
+
+const NOACCES = () => {
+  throw new Error("Can't access, variable probably not inited yet");
+};
+
+export const BLOCKED = new Proxy({ toString() { return this[PROXY]; } }, {
+  defineProperty: NOACCES,
+  deleteProperty: NOACCES,
+  preventExtensions: NOACCES,
+  setPrototypeOf: NOACCES,
+  set: NOACCES,
+  get: NOACCES
+});
+
+export function isInstanceOf(value, clazz) {
+  if (clazz === undefined) {
+    if (value !== undefined) {
+      return false;
+    }
+    return true;
+  }
+
+  if (value === undefined) {
+    return false;
+  }
+
+  const to = typeof value;
+  if (clazz === String && to === 'string') {
+    return true;
+  }
+  if (clazz === Number && to === 'number') {
+    return true;
+  }
+  if (clazz === Boolean && to === 'boolean') {
+    return true;
+  }
+  if (Object.getPrototypeOf(value) === clazz.prototype) {
+    return true;
+  }
+  return false;
 }

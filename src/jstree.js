@@ -45,7 +45,7 @@ function extractType(node, target, options) {
   const { qualifiers, integer, float, string, boolean } = options;
   const { type, name, callee, arguments: args, value, raw } = node;
 
-  if (type === 'CallExpression') {
+  if (type === 'CallExpression' || type === 'NewExpression') {
     if (callee.name === 'fun') {
       const [firstArg, secondArg] = args;
       secondArg.returnType = firstArg.name;

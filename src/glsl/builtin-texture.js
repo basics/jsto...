@@ -1,6 +1,6 @@
 const SAMPLER2D = Symbol('sampler 2d');
 
-class Texture2D {
+export class Texture2D {
   constructor(source, w = source.width, h = source.height, bilinear = true) {
     this.source = source;
     this.bilinear = bilinear;
@@ -58,7 +58,7 @@ class Texture2D {
     let { buffer } = this.bufferRef;
     if (!buffer) {
       const { source, w, h } = this;
-      if (typeof Image !== 'undefined' && source instanceof Image) {
+      if (typeof Image !== 'undefined' && source.constructor === Image) {
         let cvs = document.createElement('canvas');
         cvs.width = w;
         cvs.height = h;

@@ -1,3 +1,4 @@
+import { getSource, readOnlyView, isInstanceOf } from './utils';
 
 const TYPED_FUN = Symbol('typed function');
 const INNER_DATA = Symbol('inner data');
@@ -21,7 +22,7 @@ export function typ(typeDesc) {
       activeArgList = undefined;
       activeArgIndex = undefined;
     }
-    checkType(arg, type);
+    checkType(arg, type, 'check for default type');
 
     return arg;
   }
@@ -38,7 +39,7 @@ export function fun(type, func) {
       activeArgList = args;
       activeArgIndex = 0;
       const result = func.apply(this);
-      checkType(result, type);
+      checkType(result, type, 'check for fun result type');
       return result;
     } finally {
       activeArgList = undefined;
@@ -53,12 +54,19 @@ export function cls(classDesc) {
 
   const types = {};
   const prototype = {};
+
   Object.entries(proto).forEach(([key, val]) => {
+    if (!val) {
+      throw new Error(`undefined? ${key}`);
+    }
     if (val[TYPED_FUN]) {
       prototype[key] = val;
       return;
     }
     const { type } = extractType(val);
+    if (!type) {
+      throw new Error(`no definition found for ${key} in ${types}`);
+    }
     types[key] = type;
 
     Object.defineProperty(prototype, key, {
@@ -66,25 +74,33 @@ export function cls(classDesc) {
         return getInner(this, key);
       },
       set(value) {
-        checkType(value, types[key]);
+        if (!type) {
+          throw new Error(`no definition found for ${key} in ${types}`);
+        }
+        console.log('before checktype', key, type);
+        checkType(value, type, `check type for setter of type ${type}`);
         return setInner(this, key, value);
       }
     });
   });
-  function con(...args) {
-    if (this instanceof con) {
+  const Con = function Constructor(...args) {
+    if (isInstanceOf(this, Constructor)) {
       constructor.apply(this, args);
     } else {
       const [funDef] = args;
       if (typeof funDef !== 'function') {
+        if (isInstanceOf(funDef, Con)) {
+          return funDef;
+        }
         throw new Error('only fun definition allowd');
       }
-      return fun(con, funDef);
+      return fun(Con, funDef);
     }
-  }
-  con.prototype = prototype;
+  };
 
-  return con;
+  Con.prototype = prototype;
+
+  return readOnlyView(Con);
 }
 
 function extractType(type) {
@@ -125,33 +141,22 @@ function extractType(type) {
   throw new Error(`no type found ${type}`);
 }
 
-function checkType(type, expected) {
-  if (type === expected) {
+function checkType(value, expectedType, msg) {
+  value = getSource(value);
+  expectedType = getSource(expectedType);
+
+  if (isInstanceOf(value, expectedType)) {
     return;
   }
-  if (expected === undefined) {
-    if (type !== undefined) {
-      throw new Error(`void function doesn't allow results ${type}`);
-    }
-    return;
-  }
-  const to = typeof type;
-  if (expected === String && to === 'string') {
-    return;
-  }
-  if (expected === Number && to === 'number') {
-    return;
-  }
-  if (expected === Boolean && to === 'boolean') {
-    return;
-  }
-  if (type.constructor === expected) {
-    return;
-  }
-  if (type instanceof expected) {
-    return;
-  }
-  throw new Error(`${expected} function doesn't allow results ${type}`);
+  throw new Error(`
+${msg}
+value: ${value.x} ${value}
+
+to be instanceof
+
+expectedType: ${expectedType}
+
+`);
 }
 
 function getInner(obj, key) {
