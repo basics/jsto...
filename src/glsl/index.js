@@ -287,7 +287,7 @@ function handleAssign(node) {
     if (!typeAnnotation) {
       throwError(`
       handleAssign() no type defined for ${id.name}
-      ${JSON.stringify(node)}
+      ${JSON.stringify(node, null, '\t')}
     `, id);
     }
 
@@ -309,8 +309,24 @@ function handleAssign(node) {
           allocation = ` = ${handleNode(init)}`;
           break;
         default:
-          allocation = `; ${name} = ${handleNode(init.arguments[0])}`;
+          if (init.arguments.length) {
+            if (init.arguments.length === 1) {
+              allocation = ` = ${handleNode(init.arguments[0])}`;
+            } else {
+              throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
+            }
+          }
           break;
+      }
+    } else if (init.type === 'NewExpression') {
+      if (init.arguments.length) {
+        if (init.arguments.length === 1) {
+          allocation = ` = ${handleNode(init.arguments[0])}`;
+        } else {
+          throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
+        }
+      } else {
+        allocation = '';
       }
     } else {
       allocation = ` = ${handleNode(init)}`;

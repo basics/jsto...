@@ -85,7 +85,7 @@ vec2 bar() {
         return vec2(x, y);
       });
 
-      let action = vec2((one = vec2(), two = vec2()) => {
+      let action = float((one = vec2(), two = vec2()) => {
         return calc(() => one * two);
       });
 
@@ -97,7 +97,7 @@ vec2 bar() {
 vec2 bar(float x, float y) {
 \treturn vec2(x, y);
 }
-vec2 action(vec2 one, vec2 two) {
+float action(vec2 one, vec2 two) {
 \treturn (one * two);
 }
 `;
@@ -294,10 +294,14 @@ vec4 bar(vec2 x) {
         bar: vec2,
         zahl: float
       });
-      let bar = Foo((x = float()) => {
-        let foo = Foo;
+      let boom = Foo((x = float()) => {
+        let foo = new Foo();
         foo.bar = vec2(x, 2.0);
         foo.zahl = 5.0;
+        return foo;
+      });
+      let bar = Foo((x = float()) => {
+        let foo = new Foo(boom(x))
         return foo;
       });
       return { bar };
@@ -322,7 +326,7 @@ vec4 bar(vec2 x) {
     };
     const shader2 = ({ vec2, Foo }) => {
       let bar = Foo(() => {
-        let foo = Foo;
+        let foo = new Foo();
         foo.bar = vec2(1.0, 2.0);
         foo.zahl = 5.0;
         return foo;
@@ -366,6 +370,20 @@ vec4 bar(vec2 x) {
     assert.equal(result, true);
   });
 
+  it('works fine with Number class', () => {
+    const { js: { bar } } = buildGLSL(({ vec2, float, floor }) => {
+      let bar = vec2(() => {
+        let x = float(floor(3.0));
+        let y = float(floor(4.5));
+        return vec2(x, y);
+      });
+      return { bar };
+    }, { js: true });
+    const result = bar();
+    assert.closeTo(result.x, 3.0, 0.00001);
+    assert.closeTo(result.y, 4.0, 0.00001);
+  });
+
   it('works with set unifom parameter.', () => {
     const { js: { foo, bar, setParam } } = buildGLSL(({ uniform, calc, vec2 }) => {
       const foo = uniform(vec2);
@@ -387,8 +405,9 @@ vec4 bar(vec2 x) {
   // it('throws an error when trying to change props of an argument.', () => {
   //   const shader = ({ asin, vec2 }) => {
   //     let bar = (x = vec2()) => {
-  //       console.log('x???', x);
+  //       console.log('x???', x, x.x);
   //       x.x = 0.5;
+  //       console.log('x???', x.x);
   //     };
   //     return { bar };
   //   };

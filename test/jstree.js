@@ -351,7 +351,7 @@ describe('jstree autodetect primitive tests', () => {
     const node = parse(`
       let MyType = cls({
         fNormal: Vec3,
-        vNormal: type(Vec3)
+        vNormal: type(Vec4)
       });
     `);
 
@@ -367,7 +367,7 @@ describe('jstree autodetect primitive tests', () => {
     assert.equal(fNormal.key.name, 'fNormal');
 
     assert.equal(vNormal.type, 'PropertyDefinition');
-    assert.equal(vNormal.typeAnnotation, 'Vec3');
+    assert.equal(vNormal.typeAnnotation, 'Vec4');
     assert.equal(vNormal.key.name, 'vNormal');
   });
 });

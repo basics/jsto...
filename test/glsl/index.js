@@ -129,14 +129,14 @@ float baz() {
   it('extract type and init from implicit combinations', () => {
     const { glsl } = buildGLSL(() => {
       let baz = MyType(() => {
-        let foo = MyType(lastBuffer);
+        let foo = new MyType(lastBuffer);
         return foo;
       });
     });
 
     const expected = `
 MyType baz() {
-\tMyType foo; foo = lastBuffer;
+\tMyType foo = lastBuffer;
 \treturn foo;
 }
     `;
@@ -150,13 +150,24 @@ MyType baz() {
         fNormal: vec3,
         vNormal: vec3
       });
-
-      let foo = MyType;
     });
 
     const expected = `
 struct MyType { vec3 fNormal; vec3 vNormal; };
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works with struct init call', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = MyType();
+      let bar = new MyType();
+    });
+
+    const expected = `
 MyType foo;
+MyType bar;
     `;
 
     assert.equal(glsl.trim(), expected.trim());

@@ -1,6 +1,6 @@
 import { readOnlyView, setSource } from './utils';
 
-const IS_BUILTIN = Symbol('is builtin');
+// const IS_BUILTIN = Symbol('is builtin');
 
 let gl;
 let global;
@@ -14,20 +14,21 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
 
     Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
-      .map((name) => {
-        const fn = (...args) => {
-          const [first] = args;
-          if (typeof first === 'function' && name !== 'calc' && !first[IS_BUILTIN]) {
-            return first;
-          }
-          // FIXME: do here the checktype of builtin
+      // .map((name) => {
+      //   const fn = (...args) => {
+      //     const [first] = args;
+      //     if (typeof first === 'function' && name !== 'calc' && !first[IS_BUILTIN]) {
+      //       return first;
+      //     }
+      //     // FIXME: do here the checktype of builtin
 
 
-          return builtIn[name](...args.map((arg) => readOnlyView(arg)));
-        };
-        fn[IS_BUILTIN] = true;
-        return [name, fn];
-      })
+      //     return builtIn[name](...args.map((arg) => readOnlyView(arg)));
+      //   };
+      //   fn[IS_BUILTIN] = true;
+      //   return [name, fn];
+      // })
+      .map((name) => [name, builtIn[name].bind(builtIn)])
       .forEach(
         ([key, value]) => global[key] = value
       );

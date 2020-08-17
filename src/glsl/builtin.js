@@ -4,14 +4,24 @@
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
 import { cls, typ } from '../index';
-import { readOnlyView } from '../utils';
+import { readOnlyView, BLOCKED } from '../utils';
+import { Texture2D } from './builtin-texture';
 
-const EMPTY = Object.freeze({});
 prepare(Number, 1);
 
 function checkType(args, type) {
+
   if (!args.length) {
-    return typ(type);
+    const t = typ(type);
+    if (t === undefined) {
+      return type;
+    }
+    return readOnlyView(t);
+  }
+  const [first] = args;
+  if (typeof first === 'function') {
+    // return fun(type, first);
+    return first;
   }
 }
 export class BuiltIn {
@@ -222,7 +232,11 @@ export class BuiltIn {
     return fastCalc((I, N, eta, r) => I * eta - N * r, I, N, eta, r);
   }
 
-  texture(sampler, uv) {
+  texture(sampler, uv, bias) {
+    return sampler.get(this, uv, bias);
+  }
+
+  texture2D(sampler, uv) {
     return sampler.get(this, uv);
   }
 
@@ -231,7 +245,7 @@ export class BuiltIn {
   }
 
   uniform() {
-    return readOnlyView(EMPTY);
+    return readOnlyView(BLOCKED);
   }
 
   int(...args) {
@@ -246,25 +260,30 @@ export class BuiltIn {
     return checkType(args, Boolean) ?? args[0];
   }
 
+  sampler2D(...args) {
+    return checkType(args, Texture2D) ?? args[0];
+  }
+
   vecFactory(args, Class, len) {
     const argsLen = args.length;
     if (!argsLen) {
-      throw new Error(('empty vector args not supported by glsl'));
+      return Class;
     }
 
     const array = [];
     for (let i = 0; i < argsLen; i += 1) {
       const arg = args[i];
-      if (typeof arg === 'number') {
+      if (typeof arg === 'number' || arg.constructor === Number) {
         array.push(arg);
       } else if (!arg) {
         throw new Error(`cant handle undefined arg ${arg}`);
       } else {
-        if (arg instanceof this.options.Vec4) {
+        const { constructor } = arg;
+        if (constructor === this.options.Vec4) {
           array.push(arg.x, arg.y, arg.z, arg.w);
-        } else if (arg instanceof this.options.Vec3) {
+        } else if (constructor === this.options.Vec3) {
           array.push(arg.x, arg.y, arg.z);
-        } else if (arg instanceof this.options.Vec2) {
+        } else if (constructor === this.options.Vec2) {
           array.push(arg.x, arg.y);
         }
       }
@@ -298,10 +317,36 @@ export class BuiltIn {
   }
 
   mat3(...args) {
+    const first = args[0];
+    if (first && first.constructor === Array && first[0] && first[0].constructor === this.options.Vec4) {
+      return [first[0].xyz, first[1].xyz, first[2].xyz];
+    }
+    args.forEach((arg) => checkType([arg], this.options.Vec3));
+    return checkType(args, Array) ?? args;
+  }
+
+  mat4(...args) {
+    args.forEach((arg) => checkType(arg, this.options.Vec4));
     return checkType(args, Array) ?? args;
   }
 
   cls(definition) {
-    return cls(definition);
+    const def = {};
+    const entries = Object.entries(definition);
+    entries.forEach(([key, value]) => def[key] = value());
+
+    def.constructor = function Constructor(...args) {
+      if (args.length === 1) {
+        const first = args[0];
+        entries.forEach(([key]) => {
+          if (key !== 'constructor') {
+            this[key] = first[key];
+          }
+        });
+      } else if (args.length !== 0) {
+        throw new Error('bla');
+      }
+    };
+    return cls(def);
   }
 }
