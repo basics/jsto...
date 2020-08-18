@@ -45,4 +45,6 @@ others
 build
 
 # temporay build files
-index*
+/index-*.js
+/glsl.js
+/index.js
