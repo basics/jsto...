@@ -170,6 +170,25 @@ float action(vec2 one, vec2 two) {
     assert.equal(result.z, 1);
   });
 
+  it('works fine with glsl swizzle setter.', () => {
+    const shader = ({ vec3, vec2 }) => {
+      let bar = vec3((x = vec2()) => {
+        let res = vec3();
+        res.yx = x;
+        return res;
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(new Vec2(3, 1));
+    assert.equal(result.x, 1);
+    assert.equal(result.y, 3);
+    assert.equal(result.z, 0);
+  });
+
   it('works fine with glsl flexible vector factories.', () => {
     const shader = ({ vec4, vec2 }) => {
       let bar = vec4((x = vec2()) => {

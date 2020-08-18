@@ -1,8 +1,14 @@
 
+const KEYS = ['x', 'y', 'z', 'w'];
+
 function prep(prototype, Class, ...keys) {
   Object.defineProperty(prototype, keys.join(''), {
     get() {
       return new Class(...keys.map((k) => this[k]));
+    },
+    set(value) {
+      keys.map((k, i) => this[k] = value[KEYS[i]]);
+      return true;
     }
   });
 }
@@ -15,6 +21,10 @@ function prepare(Class, { Vec2, Vec3, Vec4 }, keysVec, keysCol) {
     Object.defineProperty(prototype, keysCol[i], {
       get() {
         return this[keyVec];
+      },
+      set(value) {
+        this[keyVec] = value;
+        return true;
       }
     });
   });
