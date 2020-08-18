@@ -307,7 +307,11 @@ function handleAssign(node) {
         case 'vec4':
         case 'mat3':
         case 'mat4':
-          allocation = ` = ${handleNode(init)}`;
+          if (init.arguments.length) {
+            allocation = ` = ${handleNode(init)}`;
+          } else {
+            allocation = '';
+          }
           break;
         default:
           if (init.arguments.length) {

@@ -223,25 +223,39 @@ float action(vec2 one, vec2 two) {
     assert.closeTo(result.y, 1.1197695149986342, 0.00001);
   });
 
-  //  vec4(calc(() => (uv % 0.05) * 20.0), 1.0, 1.0),
+  it('should throw an error when type is not inited correctly.', () => {
+    const shader = ({ vec2 }) => {
+      let bar = vec2(() => {
+        let foo = vec2;
+        return foo;
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
 
-  // it('works fine with flexible vec parameters.', () => {
-  //   const shader = ({ vec4, vec3, vec2 }) => {
-  //     let bar = vec3((x = vec2) => {
-  //       return vec4(x.xy, 0.0, 1.0);
-  //     });
-  //     return { bar };
-  //   };
-  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
-  //
-  //   const { bar } = js;
-  //
-  //   const result = bar(new Vec2(3, 1));
-  //   assert.equal(result.x, 3);
-  //   assert.equal(result.y, 3);
-  //   assert.equal(result.z, 0);
-  //   assert.equal(result.w, 1);
-  // });
+    const { bar } = js;
+
+    assert.throws(() => bar());
+
+  });
+
+  it('works fine with flexible vec parameters.', () => {
+    const shader = ({ vec4, vec2 }) => {
+      let bar = vec4((x = vec2()) => {
+        return vec4(x.xy, 0.0, 1.0);
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(new Vec2(3, 1));
+    assert.equal(result.x, 3);
+    assert.equal(result.y, 1);
+    assert.equal(result.z, 0);
+    assert.equal(result.w, 1);
+  });
 
   it('works fine with sampler2D from array buffer.', () => {
 
@@ -308,10 +322,11 @@ vec4 bar(vec2 x) {
   });
 
   it('works fine with glsl struct', () => {
-    const shader = ({ cls, vec2, float }) => {
+    const shader = ({ cls, vec2, float, bool }) => {
       let Foo = cls({
         bar: vec2,
-        zahl: float
+        zahl: float,
+        richtig: bool
       });
       let boom = Foo((x = float()) => {
         let foo = new Foo();

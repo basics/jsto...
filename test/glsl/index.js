@@ -89,7 +89,7 @@ void baz(vec2 x) {
   it('works with glsl only type definition type', () => {
     const { glsl } = buildGLSL(() => {
       let baz = vec2(() => {
-        let foo = vec2;
+        let foo = vec2();
         foo.x = 5.0;
         foo.y = 1.0;
         return foo;

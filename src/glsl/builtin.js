@@ -3,7 +3,7 @@
 
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
-import { cls, typ } from '../index';
+import { cls, typ, fun } from '../index';
 import { readOnlyView, BLOCKED, isNumber } from '../utils';
 import { Texture2D } from './builtin-texture';
 
@@ -20,8 +20,7 @@ function checkType(args, Type) {
   }
   const [first] = args;
   if (typeof first === 'function') {
-    // return fun(type, first);
-    return first;
+    return fun(Type, first);
   }
 }
 export class BuiltIn {
@@ -367,11 +366,18 @@ export class BuiltIn {
       if (args.length <= 1) {
         entries.forEach(([key, entry]) => {
           if (key !== 'constructor') {
+            let val;
             if (first) {
-              this[key] = first[key] ?? entry(0.0);
-            } else {
-              this[key] = entry(0.0);
+              val = first[key];
             }
+            if (val === undefined) {
+              if (def[key].valueOf() === false) {
+                val = entry(false);
+              } else {
+                val = entry(0.0);
+              }
+            }
+            this[key] = val;
           }
         });
       } else if (args.length !== 0) {
