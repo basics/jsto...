@@ -35,15 +35,21 @@ export function fun(type, func) {
     type = undefined;
   }
   function f(...args) {
-    try {
+
+    if (args.length) {
       activeArgList = args;
       activeArgIndex = 0;
-      const result = func.apply(this);
-      checkType(result, type, 'check for fun result type');
-      return result;
+    }
+    let result;
+    try {
+      result = func.apply(this);
     } finally {
       activeArgList = undefined;
+      activeArgIndex = -999;
     }
+    checkType(result, type, 'check for fun result type');
+    return result;
+
   }
   f[TYPED_FUN] = true;
   return f;
@@ -149,7 +155,7 @@ function checkType(value, expectedType, msg) {
   }
   throw new Error(`
 ${msg}
-value: ${value.x} ${value}
+value: ${value}
 
 to be instanceof
 
