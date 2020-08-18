@@ -296,7 +296,8 @@ vec4 bar(vec2 x) {
       });
       let boom = Foo((x = float()) => {
         let foo = new Foo();
-        foo.bar = vec2(x, 2.0);
+        foo.bar.x = x;
+        foo.bar.y = 2.0;
         foo.zahl = 5.0;
         return foo;
       });
@@ -402,6 +403,22 @@ vec4 bar(vec2 x) {
     assert.closeTo(result2.x, 3.0, 0.00001);
     assert.closeTo(result2.y, 2.0, 0.00001);
 
+  });
+
+  it('works fine with glsl default init variable', () => {
+    const shader = ({ vec2 }) => {
+      let bar = vec2(() => {
+        return vec2();
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar();
+    assert.equal(result.x, 0);
+    assert.equal(result.y, 0);
   });
 
   // it('throws an error when trying to change props of an argument.', () => {
