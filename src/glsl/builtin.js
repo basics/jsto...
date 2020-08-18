@@ -371,7 +371,7 @@ export class BuiltIn {
               val = first[key];
             }
             if (val === undefined) {
-              if (def[key].valueOf() === false) {
+              if (def[key].constructor === Boolean) {
                 val = entry(false);
               } else {
                 val = entry(0.0);
