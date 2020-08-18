@@ -4,17 +4,17 @@
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
 import { cls, typ } from '../index';
-import { readOnlyView, BLOCKED } from '../utils';
+import { readOnlyView, BLOCKED, isNumber } from '../utils';
 import { Texture2D } from './builtin-texture';
 
 prepare(Number, 1);
 
-function checkType(args, type) {
+function checkType(args, Type) {
 
   if (!args.length) {
-    const t = typ(type);
+    const t = typ(Type);
     if (t === undefined) {
-      return type;
+      return new Type(0.0);
     }
     return readOnlyView(t);
   }
@@ -266,14 +266,11 @@ export class BuiltIn {
 
   vecFactory(args, Class, len) {
     const argsLen = args.length;
-    if (!argsLen) {
-      return Class;
-    }
-
     const array = [];
+
     for (let i = 0; i < argsLen; i += 1) {
       const arg = args[i];
-      if (typeof arg === 'number' || arg.constructor === Number) {
+      if (isNumber(arg)) {
         array.push(arg);
       } else if (!arg) {
         throw new Error(`cant handle undefined arg ${arg}`);
@@ -318,7 +315,20 @@ export class BuiltIn {
 
   mat3(...args) {
     const first = args[0];
-    if (first && first.constructor === Array && first[0] && first[0].constructor === this.options.Vec4) {
+    if (isNumber(first)) {
+      if (args.length === 1) {
+        return [
+          this.vec3(first, first, first),
+          this.vec3(first, first, first),
+          this.vec3(first, first, first)
+        ];
+      }
+      return [
+        this.vec3(args[0], args[1], args[2]),
+        this.vec3(args[3], args[4], args[5]),
+        this.vec3(args[6], args[7], args[8])
+      ];
+    } else if (first && first.constructor === Array && first[0] && first[0].constructor === this.options.Vec4) {
       return [first[0].xyz, first[1].xyz, first[2].xyz];
     }
     args.forEach((arg) => checkType([arg], this.options.Vec3));
@@ -326,6 +336,23 @@ export class BuiltIn {
   }
 
   mat4(...args) {
+    const first = args[0];
+    if (isNumber(first)) {
+      if (args.length === 1) {
+        return [
+          this.vec4(first, first, first, first),
+          this.vec4(first, first, first, first),
+          this.vec4(first, first, first, first),
+          this.vec4(first, first, first, first)
+        ];
+      }
+      return [
+        this.vec4(args[0], args[1], args[2], args[3]),
+        this.vec4(args[4], args[5], args[6], args[7]),
+        this.vec4(args[8], args[9], args[10], args[11]),
+        this.vec4(args[12], args[13], args[14], args[15])
+      ];
+    }
     args.forEach((arg) => checkType(arg, this.options.Vec4));
     return checkType(args, Array) ?? args;
   }
@@ -336,11 +363,15 @@ export class BuiltIn {
     entries.forEach(([key, value]) => def[key] = value());
 
     def.constructor = function Constructor(...args) {
-      if (args.length === 1) {
-        const first = args[0];
-        entries.forEach(([key]) => {
+      const first = args[0];
+      if (args.length <= 1) {
+        entries.forEach(([key, entry]) => {
           if (key !== 'constructor') {
-            this[key] = first[key];
+            if (first) {
+              this[key] = first[key] ?? entry(0.0);
+            } else {
+              this[key] = entry(0.0);
+            }
           }
         });
       } else if (args.length !== 0) {
