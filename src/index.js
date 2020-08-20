@@ -92,6 +92,9 @@ export function cls(classDesc) {
     if (isInstanceOf(this, Constructor)) {
       constructor.apply(this, args);
     } else {
+      if (!args.length) {
+        return typ(Con);
+      }
       const [funDef] = args;
       if (typeof funDef !== 'function') {
         if (isInstanceOf(funDef, Con)) {
