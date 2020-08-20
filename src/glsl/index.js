@@ -374,6 +374,9 @@ export function buildGLSL(fun, { glsl = true, js = false, ast = false } = {}) {
 
       sh = sh.split('\n').map((s) => {
         const last = s[s.length - 1];
+        if (!s.length) {
+          return s;
+        }
         if (last === '{' || last === '}' || last === ';' || last === '/') {
           return s;
         }
