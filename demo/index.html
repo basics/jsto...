@@ -38,7 +38,7 @@
       let vUv = varying(vec2);
       let timeMsec = uniform(float);
 
-      let mainImage = vec4((uv = vec2, time = float) => {
+      let mainImage = vec4((uv = vec2(), time = float()) => {
         let t = float(time / 1000.0);
 
         return mix(
