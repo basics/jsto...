@@ -144,6 +144,22 @@ MyType baz() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('extract void function', () => {
+    const { glsl } = buildGLSL(() => {
+      let main = fun(() => {
+
+      });
+    });
+
+    const expected = `
+void main() {
+
+}
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('works with struct', () => {
     const { glsl } = buildGLSL(() => {
       let MyType = cls({

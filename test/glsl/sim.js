@@ -360,8 +360,14 @@ vec4 bar(vec2 x) {
       return { Foo };
     };
     const shader2 = ({ vec2, Foo }) => {
+      let preparFoo = Foo((foo = Foo()) => {
+        foo.bar = vec2(1.0, 2.0);
+        foo.zahl = 5.0;
+        return foo;
+      });
+
       let bar = Foo(() => {
-        let foo = new Foo();
+        let foo = Foo(preparFoo(new Foo()));
         foo.bar = vec2(1.0, 2.0);
         foo.zahl = 5.0;
         return foo;
@@ -455,33 +461,44 @@ vec4 bar(vec2 x) {
     assert.equal(result.y, 0);
   });
 
-  // it('throws an error when trying to change props of an argument.', () => {
-  //   const shader = ({ asin, vec2 }) => {
-  //     let bar = (x = vec2()) => {
-  //       console.log('x???', x, x.x);
-  //       x.x = 0.5;
-  //       console.log('x???', x.x);
-  //     };
-  //     return { bar };
-  //   };
-  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+  it('throws an error when trying to change props of an argument.', () => {
+    const shader = ({ fun, vec2 }) => {
+      let bar = fun((x = vec2()) => {
+        x.x = 0.5;
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
 
-  //   const { bar } = js;
+    const { bar } = js;
 
-  //   assert.throws(() => (bar(new Vec2(0.1, 0.9))));
-  // });
+    assert.throws(() => (bar(new Vec2(0.1, 0.9))));
+  });
 
-  // it('throws an arrow when assigning wrong type to function.', () => {
-  //   const shader = ({ asin, vec2 }) => {
-  //     let bar = (x = vec2()) => {
-  //       x.x * 5.0;
-  //     };
-  //     return { bar };
-  //   };
-  //   const { js } = buildGLSL(shader, { js: true, glsl: false });
+  it('throws an error when assigning wrong type to function.', () => {
+    const shader = ({ fun, vec2 }) => {
+      let bar = fun((x = vec2()) => {
+        let y = vec2(x);
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
 
-  //   const { bar } = js;
+    const { bar } = js;
 
-  //   assert.throws(() => (bar(new Vec3(0.1, 0.9, 5.0))));
-  // });
+    assert.throws(() => (bar(new Vec3(0.1, 0.9, 1.0))));
+  });
+
+  it('throws an error when return not void correctly.', () => {
+    const shader = ({ fun, vec2 }) => {
+      let bar = fun((x = vec2()) => {
+        return x;
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+    assert.throws(() => (bar(new Vec2(0.1, 0.9))));
+  });
 });
