@@ -48,8 +48,13 @@ function extractType(node, target, options) {
   if (type === 'CallExpression' || type === 'NewExpression') {
     if (callee.name === 'fun') {
       const [firstArg, secondArg] = args;
-      secondArg.returnType = firstArg.name;
-      target.newInit = handleParams(secondArg, options);
+      if (!secondArg) {
+        firstArg.returnType = 'void';
+        target.newInit = handleParams(firstArg, options);
+      } else {
+        secondArg.returnType = firstArg.name;
+        target.newInit = handleParams(secondArg, options);
+      }
     } else if (callee.name === 'type') {
       extractType(args[0], target, options);
     } else if (qualifiers.includes(callee.name)) {

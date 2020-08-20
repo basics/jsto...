@@ -156,6 +156,18 @@ describe('jstree implicit tests', () => {
     assert.equal(id.qualifier, null);
   });
 
+  it('extract void function from explicit VariableDeclarator', () => {
+    const node = parse('let x = fun(() => {});');
+
+    const [declarator] = node.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init.type, 'ArrowFunctionExpression');
+    assert.equal(init.returnType, 'void');
+    assert.equal(id.name, 'x');
+    assert.equal(id.qualifier, null);
+  });
+
   it('extract typed argument from implicit AssignmentPattern', () => {
     const node = parse('let x = String((y = String) => undefined);');
 
