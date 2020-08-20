@@ -313,47 +313,11 @@ export class BuiltIn {
   }
 
   mat3(...args) {
-    const first = args[0];
-    if (isNumber(first)) {
-      if (args.length === 1) {
-        return [
-          this.vec3(first, first, first),
-          this.vec3(first, first, first),
-          this.vec3(first, first, first)
-        ];
-      }
-      return [
-        this.vec3(args[0], args[1], args[2]),
-        this.vec3(args[3], args[4], args[5]),
-        this.vec3(args[6], args[7], args[8])
-      ];
-    } else if (first && first.constructor === Array && first[0] && first[0].constructor === this.options.Vec4) {
-      return [first[0].xyz, first[1].xyz, first[2].xyz];
-    }
-    args.forEach((arg) => checkType([arg], this.options.Vec3));
-    return checkType(args, Array) ?? args;
+    return checkType(args, this.options.Mat3) ?? new this.options.Mat3(...args);
   }
 
   mat4(...args) {
-    const first = args[0];
-    if (isNumber(first)) {
-      if (args.length === 1) {
-        return [
-          this.vec4(first, first, first, first),
-          this.vec4(first, first, first, first),
-          this.vec4(first, first, first, first),
-          this.vec4(first, first, first, first)
-        ];
-      }
-      return [
-        this.vec4(args[0], args[1], args[2], args[3]),
-        this.vec4(args[4], args[5], args[6], args[7]),
-        this.vec4(args[8], args[9], args[10], args[11]),
-        this.vec4(args[12], args[13], args[14], args[15])
-      ];
-    }
-    args.forEach((arg) => checkType(arg, this.options.Vec4));
-    return checkType(args, Array) ?? args;
+    return checkType(args, this.options.Mat4) ?? new this.options.Mat4(...args);
   }
 
   cls(definition) {
@@ -384,6 +348,10 @@ export class BuiltIn {
         throw new Error('bla');
       }
     };
-    return cls(def);
+    return readOnlyView(cls(def));
+  }
+
+  fun(func) {
+    return fun(func);
   }
 }

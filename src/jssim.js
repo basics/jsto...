@@ -1,11 +1,9 @@
 import { readOnlyView, setSource } from './utils';
 
-// const IS_BUILTIN = Symbol('is builtin');
-
 let gl;
 let global;
 
-export function sim(fun, { BuiltIn, ...options } = {}, extras) {
+export function sim(func, { BuiltIn, ...options } = {}, extras) {
   if (!gl) {
 
     const builtIn = new BuiltIn(options);
@@ -14,18 +12,7 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
 
     Object.getOwnPropertyNames(BuiltIn.prototype)
       .filter((name) => (name !== 'constructor'))
-      // .map((name) => {
-      //   const fn = (...args) => {
-      //     const [first] = args;
-      //     if (typeof first === 'function' && name !== 'calc' && !first[IS_BUILTIN]) {
-      //       return first;
-      //     }
-      //     // FIXME: do here the checktype of builtin
-      //     return builtIn[name](...args.map((arg) => readOnlyView(arg)));
-      //   };
-      //   fn[IS_BUILTIN] = true;
-      //   return [name, fn];
-      // })
+      // FIXME: do here the checktype of builtin
       .map((name) => [name, builtIn[name].bind(builtIn)])
       .forEach(
         ([key, value]) => global[key] = value
@@ -36,9 +23,9 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
 
   let result;
   if (extras) {
-    result = fun(readOnlyView({ ...global, ...extras }));
+    result = func(readOnlyView({ ...global, ...extras }));
   } else {
-    result = fun(gl);
+    result = func(gl);
   }
 
   if (!result) {
@@ -50,13 +37,4 @@ export function sim(fun, { BuiltIn, ...options } = {}, extras) {
   };
 
   return result;
-  // const res = {};
-  // Object.entries(result)
-  //   .forEach(
-  //     ([name, fn]) => {
-  //       console.log('fn???', typeof fn);
-  //       res[name] = (...args) => fn(...args.map((arg) => readOnlyView(arg)));
-  //     }
-  //   );
-  // return readOnlyView(res);
 }
