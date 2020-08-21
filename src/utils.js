@@ -7,6 +7,20 @@ const NOPE = () => {
   throw new Error("Can't modify read-only view");
 };
 
+class Num {
+  constructor(nr) {
+    this.nr = nr;
+  }
+
+  valueOf() {
+    return this.nr;
+  }
+
+  toString() {
+    return `${this.nr}`;
+  }
+}
+
 export function readOnlyView(target) {
   if (target === undefined || target === null) {
     return target;
@@ -18,6 +32,9 @@ export function readOnlyView(target) {
     const { constructor } = target;
     if (constructor === Number) {
       return target;
+    }
+    if (constructor === Num) {
+      return target.nr;
     }
     if (constructor === Boolean) {
       return target;
@@ -80,7 +97,7 @@ export function setSource(proxy, target) {
     `);
   }
   if (isNumber(target)) {
-    target = Number(target);
+    target = new Num(target);
   }
   proxy[PROXY] = target;
   return true;
@@ -128,7 +145,7 @@ export function isInstanceOf(value, clazz) {
 }
 
 export function isNumber(nr) {
-  if (typeof nr === 'number' || nr?.constructor === Number) {
+  if (typeof nr === 'number' || nr?.constructor === Number || nr?.constructor === Num) {
     return true;
   }
   return false;
