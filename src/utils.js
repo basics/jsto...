@@ -1,22 +1,11 @@
 
 const IS_PROXY = Symbol('is proxy');
 const PROXY = Symbol('proxy source');
-const TARGET = Symbol('target');
 
 // https://blog.bitsrc.io/a-practical-guide-to-es6-proxy-229079c3c2f0
 const NOPE = () => {
   throw new Error("Can't modify read-only view");
 };
-
-class Num {
-  constructor(nr) {
-    this.nr = nr;
-  }
-
-  valueOf() {
-    return this.nr;
-  }
-}
 
 export function readOnlyView(target) {
   if (target === undefined || target === null) {
@@ -42,14 +31,16 @@ export function readOnlyView(target) {
     }
   }
 
-  return new Proxy(target, {
+  const data = { target };
+
+  return new Proxy(data, {
     defineProperty: NOPE,
     deleteProperty: NOPE,
     preventExtensions: NOPE,
     setPrototypeOf: NOPE,
-    set(_, key, value) {
+    set(data, key, value) {
       if (key === PROXY) {
-        target = value;
+        data.target = value;
         return true;
       }
       NOPE();
@@ -59,9 +50,9 @@ export function readOnlyView(target) {
         return true;
       }
       if (key === PROXY) {
-        return target;
+        return data.target;
       }
-      return target[key];
+      return data.target[key];
     }
   });
 }
@@ -89,7 +80,7 @@ export function setSource(proxy, target) {
     `);
   }
   if (isNumber(target)) {
-    target = new Num(target);
+    target = Number(target);
   }
   proxy[PROXY] = target;
   return true;
@@ -99,7 +90,7 @@ const NOACCES = () => {
   throw new Error("Can't access, variable probably not inited yet");
 };
 
-export const BLOCKED = new Proxy({ get [TARGET]() { return this[PROXY]; } }, {
+export const BLOCKED = new Proxy({ name: 'BLOCKED' }, {
   defineProperty: NOACCES,
   deleteProperty: NOACCES,
   preventExtensions: NOACCES,
@@ -124,7 +115,7 @@ export function isInstanceOf(value, clazz) {
   if (clazz === String && to === 'string') {
     return true;
   }
-  if (clazz === Number && to === 'number') {
+  if (clazz === Number && isNumber(value)) {
     return true;
   }
   if (clazz === Boolean && to === 'boolean') {
