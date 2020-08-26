@@ -1,9 +1,10 @@
 const SAMPLER2D = Symbol('sampler 2d');
 
 export class Texture2D {
-  constructor(source, w = source.width, h = source.height, bilinear = true) {
+  constructor(source, w = source.width, h = source.height, bilinear = true, flipY = false) {
     this.source = source;
     this.bilinear = bilinear;
+    this.flipY = flipY;
     this.w = w;
     this.h = h;
 
@@ -41,7 +42,12 @@ export class Texture2D {
 
   getPixel(builtIn, x, y) {
     const buffer = this.getBuffer();
-    let index = (this.w * y + x) * 4;
+    let index;
+    if (this.flipY) {
+      index = (this.w * (this.h - y) + x) * 4;
+    } else {
+      index = (this.w * y + x) * 4;
+    }
     return builtIn.vec4(buffer[index] / 255, buffer[index + 1] / 255, buffer[index + 2] / 255, buffer[index + 3] / 255);
   }
 
@@ -93,10 +99,10 @@ export class Texture2D {
   }
 }
 
-export function sampler2D(source, w, h, bilinear) {
+export function sampler2D(source, w, h, bilinear, flipY) {
   let texture = source[SAMPLER2D];
   if (!texture) {
-    texture = new Texture2D(source, w, h, bilinear);
+    texture = new Texture2D(source, w, h, bilinear, flipY);
   }
   return texture;
 }
