@@ -14,8 +14,6 @@
     "eslint.validate": [
       "javascript"
     ],
-    "prettier.eslintIntegration": true,
-    "prettier.stylelintIntegration": true,
     "files.exclude": {
       ".nuxt/": true,
       "dist/": true,
@@ -61,7 +59,6 @@
       "deerawan.vscode-dash",
       "EditorConfig.EditorConfig",
       "eg2.vscode-npm-script",
-      "esbenp.prettier-vscode",
       "formulahendry.auto-close-tag",
       "formulahendry.auto-rename-tag",
       "humao.rest-client",
