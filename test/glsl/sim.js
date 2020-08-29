@@ -501,4 +501,32 @@ vec4 bar(vec2 x) {
     const { bar } = js;
     assert.throws(() => (bar(new Vec2(0.1, 0.9))));
   });
+
+  it('works fine with builtIn internal fastCalc', () => {
+    const shader = ({ vec3, min, float, clamp }) => {
+      let min1 = vec3((x = vec3(), y = vec3()) => {
+        return min(x, y);
+      });
+      let min2 = float((x = float(), y = float()) => {
+        return min(x, y);
+      });
+      return { min1, min2, min, clamp };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { min, clamp } = js;
+
+    clamp(new Vec3(0.3, 0.4, 0.5), new Vec3(0, 0, 0), new Vec3(1, 1, 1));
+
+    const result1 = min(new Vec3(3, 4, 5), new Vec3(5, 2, 8));
+    assert.equal(result1.x, 3);
+    assert.equal(result1.y, 2);
+    assert.equal(result1.z, 5);
+
+    const result2 = min(Number(111), Number(90));
+    assert.equal(result2, 90);
+
+    const resultOrg = min(Number(150), Number(120));
+    assert.equal(resultOrg, 120);
+  });
 });

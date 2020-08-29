@@ -1,5 +1,4 @@
 
-let tmpArrays = [[], [], [], [], [], []];
 const results = [new Array(1), new Array(2), new Array(3), new Array(4)];
 
 export function prepare(Class, length) {
@@ -48,7 +47,7 @@ export function prepare(Class, length) {
 export function fastCalc(alg, ...args) {
   let max = 0;
   let MaxClass;
-
+  const tmpArrays = [[], [], [], [], [], []];
   const argsLen = args.length;
   for (let i = 0; i < argsLen; i += 1) {
     const arg = args[i];
