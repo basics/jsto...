@@ -1,5 +1,6 @@
+// @ts-nocheck
 import { assert } from 'chai';
-import { buildGLSL, sampler2D, joinGLSL } from '../../src/glsl';
+import { buildGLSL, joinGLSL } from '../../src/glsl';
 
 describe('glsl tests', () => {
   it('glsl hello world works.', () => {
@@ -65,7 +66,7 @@ float baz() {
         let bar = vec2((x = vec2(1.0, 2.0)) => {
           x = normalize(x);
           return vec2(x.x, y);
-        })
+        });
       });
     });
   });

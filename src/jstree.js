@@ -87,6 +87,8 @@ function extractType(node, target, options) {
   } else if (type === 'ArrowFunctionExpression') {
     target.newInit = handleParams(node, options);
     target.newInit.returnType = 'void';
+  } else {
+    target.newInit = node;
   }
   return target;
 }

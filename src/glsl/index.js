@@ -83,10 +83,10 @@ function handleNode(node) {
     return updExp(node);
   }
   if (type === 'BreakStatement') {
-    return breSta(node);
+    return breSta();
   }
   if (type === 'ContinueStatement') {
-    return conSta(node);
+    return conSta();
   }
   if (type === 'ThrowStatement') {
     return thrSta(node);
@@ -352,7 +352,7 @@ function handleBody(body, tabCount = 0) {
     .join('\n');
 }
 
-export function buildGLSL(fun, { glsl = true, js = false, ast = false } = {}) {
+export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } = {}) {
   // console.log('fun', fun.toString());
 
   let str;

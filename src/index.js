@@ -56,6 +56,9 @@ export function fun(type, func) {
 }
 
 export function cls(classDesc) {
+  if (!(typeof classDesc === 'object')) {
+    return classDesc;
+  }
   const { constructor, ...proto } = classDesc;
 
   const types = {};
