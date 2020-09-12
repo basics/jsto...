@@ -1,6 +1,6 @@
 {
   "name": "@js-basics/jsto...",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "transpile js to other languages",
   "main": "./index.js",
   "module": "./build/esm/index.js",
@@ -41,6 +41,7 @@
     "@babel/register": "7.11.5",
     "@commitlint/cli": "9.1.2",
     "@commitlint/config-conventional": "9.1.2",
+    "@types/mocha": "8.0.3",
     "babel-eslint": "10.1.0",
     "babel-plugin-istanbul": "6.0.0",
     "babel-preset-minify": "0.5.1",
