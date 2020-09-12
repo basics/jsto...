@@ -6,13 +6,13 @@
 [![Dependencies Status](https://david-dm.org/basics/jsto.../status.svg)](https://david-dm.org/basics/jsto...)
 [![DevDependencies Status](https://david-dm.org/basics/jsto.../dev-status.svg)](https://david-dm.org/basics/jsto...?type=dev)
 
-# jsto...
+# jsto ...
 
 this libary is going to provide you a simple way of writing typed js code.
 this code can run and tested directly with js.
 but with types it can be transpiled to other languages, too.
 
-a type checker is in process, too. there will be a simple checking without type inference, 
+a type checker is in process, too. there will be a simple checking without type inference,
 this can be archived with typescript, but not at runtime.
 
 | environment              | jsto... checker | typescript |
@@ -21,21 +21,23 @@ this can be archived with typescript, but not at runtime.
 | build time               |        ✓        |     ✓      |
 | IDE time (the best time) |        ✗        |     ✓      |
 
-| typesafe   | jsto... checker | typescript |
-| ---------- | :-------------: | :--------: |
-| functions  |        ✓        |     ✓      |
-| arguments  |        ✓        |     ✓      |
-| prototypes |        ✓        |     ✓      |
-| classes    |        ✗        |     ✓      |
-| attributes |        ✓        |     ✓      |
-| methods    |        ✓        |     ✓      |
-| variables  |        ✗        |     ✓      |
+| typesafe    | jsto... checker | typescript |
+| ----------- | :-------------: | :--------: |
+| functions   |        ✓        |     ✓      |
+| arguments   |        ✓        |     ✓      |
+| prototypes  |        ✓        |     ✓      |
+| classes     |        ✗        |     ✓      |
+| attributes  |        ✓        |     ✓      |
+| methods     |        ✓        |     ✓      |
+| variables   |        ✗        |     ✓      |
+| arythmetics |        ✓        |     ✗      |
 
 # features in process
 
 - [x] generate JSTree out of js
   - ESTree + type annotations
 - [ ] index.d.ts file with generics for typescript
+- [ ] type inference
 - [ ] jstoGLSL transpiler great for performance
   - [x] generate valid glsl code
   - [ ] glsl polyfills
@@ -53,10 +55,11 @@ this can be archived with typescript, but not at runtime.
   - [ ] typesafety
 
 in future
+
 - [ ] jstoWASM transpiler great for headless rendering
-  - [ ] first iteration implement glsl behavior (vector and matrix) 
-  inspired by https://github.com/AssemblyScript/assemblyscript
-  use decompiler to compare https://v8.dev/blog/wasm-decompile
+  - [ ] first iteration implement glsl behavior (vector and matrix)
+  inspired by <https://github.com/AssemblyScript/assemblyscript>
+  use decompiler to compare <https://v8.dev/blog/wasm-decompile>
 - [ ] jstoWASM simulator
 - [ ] what other languages do we need?
 
