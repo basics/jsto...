@@ -268,6 +268,26 @@ describe('jstree implicit tests', () => {
     assert.equal(args[1].value, 2);
   });
 
+  it('extract init from implicit VariableDeclarator inside fun without getting the type', () => {
+    const node = parse(`let x = Vec2(() => {
+      let foo = x.yx;
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init: { type, object, property } } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, null);
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+    assert.equal(type, 'MemberExpression');
+    assert.equal(object.name, 'x');
+    assert.equal(property.name, 'yx');
+
+  });
+
   it('extract type and init from implicit VariableDeclarator inside fun with multiple args', () => {
     const node = parse(`let x = String(() => {
       let foo = String(createString());

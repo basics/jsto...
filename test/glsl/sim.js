@@ -10,10 +10,6 @@ describe('glsl tests', () => {
     return MOCKED;
   }
 
-  function multiplySim(a, b) {
-    return a.x * b.x;
-  }
-
   class Vec2 {
     constructor(x = 0, y = x) {
       this.x = x;
@@ -48,11 +44,10 @@ describe('glsl tests', () => {
   }
 
   const jsOptions = {
-    multiply: multiplySim,
     Vec2, Vec3, Vec4,
     calc: calcSim
   };
-  buildGLSL(() => { return {} }, { glsl: false, js: jsOptions });
+  buildGLSL(() => { return {}; }, { glsl: false, js: jsOptions });
 
   it('works glsl vectors.', () => {
     const shader = ({ vec2 }) => {
@@ -336,7 +331,7 @@ vec4 bar(vec2 x) {
         return foo;
       });
       let bar = Foo((x = float()) => {
-        let foo = new Foo(boom(x))
+        let foo = new Foo(boom(x));
         return foo;
       });
       return { bar };

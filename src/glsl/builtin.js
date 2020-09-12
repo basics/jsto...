@@ -354,4 +354,24 @@ export class BuiltIn {
   fun(func) {
     return fun(func);
   }
+
+  equal(x, y) {
+    if (x === y) {
+      return true;
+    }
+    if (!x && !y) {
+      return true;
+    }
+    if (!x) {
+      return false;
+    }
+    if (x.equals) {
+      return x.equals(y);
+    }
+    return false;
+  }
+
+  notEqual(x, y) {
+    return !this.equal(x, y);
+  }
 }
