@@ -1,0 +1,5 @@
+{
+  "typeRoots": [
+    "src/index.d.ts"
+  ]
+}

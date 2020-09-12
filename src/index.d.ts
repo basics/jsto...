@@ -1,4 +1,11 @@
 
+export declare const string: string;
+export declare const number: number;
+export declare const boolean: boolean;
+
+type Parameters<T extends ((...args: any) => any) | Function> = T extends (...args: infer P) => any ? P : never;
+type ReturnType<T extends ((...args: any) => any) | Function> = T extends (...args: any) => infer R ? R : any;
+
 type TypedClass<T> = { new(...args: any[]): T };
 
 type GetNumber<T> = { valueOf(): T, toExponential(): string };
@@ -9,28 +16,32 @@ type GetClass<T> = { new(): T };
 
 type GetConstructor<T> = { constructor: T };
 
-type IsType<T> = TypedClass<T> | GetNumber<T> | GetString<T> | GetClass<T> | T;
+type IsType<T> = TypedClass<T> | GetNumber<T> | GetString<T> | T;
 
 // https://dev.to/aexol/typescript-tutorial-infer-keyword-2cn
-type GetType<F extends IsType<any>> = F extends IsType<infer P> ? P : never;
-
-export declare function typ<T>(c: IsType<T> ): T;
+// type GetType<F extends IsType<any>> = F extends IsType<infer P> ? P : never;
 
 // https://stackoverflow.com/questions/44461636/fixed-length-array-with-optional-items-in-typescript-interface
-type NonNullableArray<T> = {
-    [K in keyof T]: NonNullable<T[K]>
-};
+// type NonNullableArray<T> = {
+//   [K in keyof T]: NonNullable<T[K]>
+// };
 
-type RequiredArray<T> = NonNullableArray<Required<T>>;
-
-type NonNullableArgsFunction<F, R> = {(...args: RequiredArray<Parameters<F>>): R};
-
-type MyFun = typeof Function;
+// type IsFun = { isFun: true };
+// type TypedDef<T> = Extract<T, IsFun>;
 
 type SameType<A, B, C> = A extends B ? C : never;
 
-export declare function fun<T extends void, F extends Function>(fun: F): NonNullableArgsFunction<F, T>;
-export declare function fun<F extends Function, T extends ReturnType<F>>(type: GetClass<T>, fun: F): NonNullableArgsFunction<F, T>;
-// export declare function fun<T, F extends SameType<ReturnType<F>, GetClass<T>, Function>>(type: GetClass<T>, fun: F): NonNullableArgsFunction<F, T>;
+type Proto = { constructor: Function };
+type TypedCls<T, Con extends Function> = { new(...args: Parameters<Con>): T };
 
-export declare function cls<T, A>(prototype: T): TypedClass<Omit<T, 'constructor'>>;
+export declare function typ<T>(type: (IsType<T>)): T;
+
+
+type Bind = CallableFunction['bind'];
+
+
+export declare function fun<F extends Function>(func: SameType<ReturnType<F>, void, F>): { (...args: Parameters<F>): ReturnType<F> };
+export declare function fun<T, F extends Function>(type: IsType<T>, func: SameType<ReturnType<F>, T, F>): { (...args: Parameters<F>): ReturnType<F> };
+
+export declare function cls<T extends Proto>(prototype: T): TypedCls<Omit<T, 'constructor'>, T['constructor']>;
+
