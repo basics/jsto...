@@ -8,8 +8,6 @@ class Test {
 }
 
 describe('type tests', () => {
-
-
   // const f1 = (str = typ(string)) => {
   //   return parseFloat(str);
   // }

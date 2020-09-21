@@ -36,12 +36,9 @@ type TypedCls<T, Con extends Function> = { new(...args: Parameters<Con>): T };
 
 export declare function typ<T>(type: (IsType<T>)): T;
 
-
-type Bind = CallableFunction['bind'];
-
+// type Bind = CallableFunction['bind'];
 
 export declare function fun<F extends Function>(func: SameType<ReturnType<F>, void, F>): { (...args: Parameters<F>): ReturnType<F> };
 export declare function fun<T, F extends Function>(type: IsType<T>, func: SameType<ReturnType<F>, T, F>): { (...args: Parameters<F>): ReturnType<F> };
 
 export declare function cls<T extends Proto>(prototype: T): TypedCls<Omit<T, 'constructor'>, T['constructor']>;
-

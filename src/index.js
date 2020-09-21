@@ -152,7 +152,7 @@ function extractType(type) {
   throw new Error(`no type found ${type}`);
 }
 
-function checkType(value, expectedType, msg) {
+export function checkType(value, expectedType, msg) {
   value = getSource(value);
   expectedType = getSource(expectedType);
 

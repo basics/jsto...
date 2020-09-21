@@ -247,6 +247,25 @@ describe('jstree implicit tests', () => {
     assert.equal(id.qualifier, null);
   });
 
+  it('extract array type and init from implicit VariableDeclarator', () => {
+    const node = parse(`
+      let foo = String(['foo', 'bar']);
+    `);
+
+    const [declarator] = node.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'String');
+    assert.equal(init.arguments[0].elements[0].value, 'foo');
+    assert.equal(init.arguments[0].elements[1].value, 'bar');
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'String[2]');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+  });
+
   it('extract type and init from implicit VariableDeclarator inside fun with multiple args', () => {
     const node = parse(`let x = Vec2(() => {
       let foo = Vec2(3.0, 2.0);
@@ -338,6 +357,20 @@ describe('jstree autodetect primitive tests', () => {
     assert.equal(id.qualifier, null);
     assert.equal(init.raw, '5.0');
   });
+
+  it('extract type via autodetect unary float', () => {
+    const node = parse('let x = +5.0;', { float: 'SPECIAL' });
+
+    const [declarator] = node.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'SPECIAL');
+    assert.equal(id.name, 'x');
+    assert.equal(id.qualifier, null);
+    assert.equal(init.raw, '+5.0');
+  });
+
 
   it('extract type via autodetect integer', () => {
     const node = parse('let x = 5;', { integer: 'SPECIAL' });

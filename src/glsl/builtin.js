@@ -3,7 +3,7 @@
 
 import { swizzle } from './swizzle';
 import { prepare, fastCalc } from './fast-calc';
-import { cls, typ, fun } from '../index';
+import { cls, typ, fun, checkType as check } from '../index';
 import { readOnlyView, BLOCKED, isNumber } from '../utils';
 import { Texture2D } from './builtin-texture';
 
@@ -19,7 +19,12 @@ function checkType(args, Type) {
     return readOnlyView(t);
   }
   const [first] = args;
-  if (typeof first === 'function') {
+  if (Array.isArray(first)) {
+    return readOnlyView(first.map((el) => {
+      check(el, Type);
+      return el;
+    }));
+  } else if (typeof first === 'function') {
     return fun(Type, first);
   }
 }
