@@ -290,7 +290,7 @@ function handleAssign(node) {
       typeAnnotation = init.returnType;
       allocation = handleNode(init);
     } else {
-      allocation = handleAlloc(init, typeAnnotation);
+      allocation = handleAlloc(init, typeAnnotation, name);
     }
   }
 
@@ -301,7 +301,7 @@ function handleAssign(node) {
   return `${qualifier}${typeAnnotation} ${name}${allocation}`;
 }
 
-function handleAlloc(init, typeAnnotation) {
+function handleAlloc(init, typeAnnotation, name) {
   let allocation = '';
   if (init.type === 'CallExpression') {
 
@@ -325,7 +325,7 @@ function handleAlloc(init, typeAnnotation) {
           if (init.arguments.length === 1) {
             const [first] = init.arguments;
             if (first.type === 'ArrayExpression') {
-              allocation = ` = ${typeAnnotation}(${first.elements.map(handleNode).join(', ')})`;
+              allocation = `; ${first.elements.map((n, i) => `${name}[${i}] = ${handleNode(n)}`).join('; ')};`;
             } else {
               allocation = ` = ${handleNode(init.arguments[0])}`;
             }
