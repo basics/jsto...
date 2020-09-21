@@ -30,7 +30,7 @@ this can be archived with typescript, but not at runtime.
 | attributes  |        ✓        |     ✓      |
 | methods     |        ✓        |     ✓      |
 | variables   |        ✗        |     ✓      |
-| arythmetics |        ✓        |     ✗      |
+| arithmetics |        ✓        |     ✗      |
 
 # features in process
 
