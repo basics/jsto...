@@ -190,6 +190,30 @@ MyType bar;
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('works with float arrays', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = float([1.0, 2.0]);
+    });
+
+    const expected = `
+float[2] foo = float[2](1.0, 2.0);
+      `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works with vec arrays', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = vec2([vec2(1.0, 2.0), vec(3.0, 4.0)]);
+    });
+
+    const expected = `
+vec2[2] foo = vec2[2](vec2(1.0, 2.0), vec(3.0, 4.0));
+      `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('works with joining chunks', () => {
     const one = buildGLSL(() => {
       let foo = uniform(vec2);

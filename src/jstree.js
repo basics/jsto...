@@ -64,8 +64,17 @@ function extractType(node, target, options) {
       const [firstArg] = args;
       firstArg.returnType = callee.name;
       target.newInit = handleParams(firstArg, options);
+    } else if (args[0] && (args[0].type === 'ArrayExpression')) {
+      const [firstArg] = args;
+      target.typeAnnotation = `${callee.name}[${firstArg.elements.length}]`;
+      target.newInit = {
+        ...node, arguments: [handleNode(firstArg, options)]
+      };
     } else {
+
       const typeAnnotation = callee.name;
+
+
       target.typeAnnotation = typeAnnotation;
       target.newInit = node;
     }
@@ -84,6 +93,25 @@ function extractType(node, target, options) {
       target.typeAnnotation = string;
     }
     target.newInit = node;
+  } else if (type === 'UnaryExpression') {
+    const { argument, operator } = node;
+    const { value, raw } = argument;
+    if (typeof value === 'number') {
+      if (raw.indexOf('.') < 0) {
+        target.typeAnnotation = integer;
+      } else {
+        target.typeAnnotation = float;
+      }
+    } else if (typeof value === 'boolean') {
+      target.typeAnnotation = boolean;
+    } else {
+      target.typeAnnotation = string;
+    }
+    target.newInit = {
+      ...argument,
+      raw: `${operator}${raw}`,
+      value: operator === '-' ? -value : value
+    };
   } else if (type === 'ArrowFunctionExpression') {
     target.newInit = handleParams(node, options);
     target.newInit.returnType = 'void';
@@ -143,7 +171,7 @@ function handleNode(node, options) {
 
 export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, ...options } = {}) {
   // TODO: use onToken !!!!
-  const ast = acorn.parse(input, { ...options, locations, ranges });
+  const ast = acorn.parse(input, { ...options, locations, ranges, ecmaVersion: 6 });
   const node = handleNode(ast, { qualifiers, integer, float, string, boolean });
 
   return node;

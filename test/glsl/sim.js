@@ -456,6 +456,20 @@ vec4 bar(vec2 x) {
     assert.equal(result.y, 0);
   });
 
+  it('works fine with primitive arrays', () => {
+    const shader = ({ vec2 }) => {
+      let bar = vec2([vec2(1.0, 2.0), vec2(3.0, 4.0)]);
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar: [v1, v2] } = js;
+    assert.equal(v1.x, 1);
+    assert.equal(v1.y, 2);
+    assert.equal(v2.x, 3);
+    assert.equal(v2.y, 4);
+  });
+
   it('throws an error when trying to change props of an argument.', () => {
     const shader = ({ fun, vec2 }) => {
       let bar = fun((x = vec2()) => {

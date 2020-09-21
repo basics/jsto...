@@ -94,9 +94,6 @@ function handleNode(node) {
   if (type === 'Property') {
     return prop(node);
   }
-  // if (type === 'ArrayExpression') {
-  // return arrExp(node);
-  // }
   console.warn(`//handleNode() unkown type ${type}`, node);
   return `//handleNode() unkown type ${type}`;
 }
@@ -130,10 +127,6 @@ function forSta({
 function conExp({ test, consequent, alternate }) {
   return `${handleNode(test)} ? ${handleNode(consequent)} : ${handleNode(alternate)}`;
 }
-
-// function arrExp({ elements }) {
-//   return `{${elements.map(handleNode).join(', ')}}`;
-// }
 
 function ifStat(node) {
   const { alternate, consequent, test } = node;
@@ -296,45 +289,8 @@ function handleAssign(node) {
     if (init.type === 'ArrowFunctionExpression') {
       typeAnnotation = init.returnType;
       allocation = handleNode(init);
-    } else if (init.type === 'CallExpression') {
-
-      switch (typeAnnotation) {
-        case 'int':
-        case 'float':
-        case 'bool':
-        case 'vec2':
-        case 'vec3':
-        case 'vec4':
-        case 'mat3':
-        case 'mat4':
-          if (init.arguments.length) {
-            allocation = ` = ${handleNode(init)}`;
-          } else {
-            allocation = '';
-          }
-          break;
-        default:
-          if (init.arguments.length) {
-            if (init.arguments.length === 1) {
-              allocation = ` = ${handleNode(init.arguments[0])}`;
-            } else {
-              throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
-            }
-          }
-          break;
-      }
-    } else if (init.type === 'NewExpression') {
-      if (init.arguments.length) {
-        if (init.arguments.length === 1) {
-          allocation = ` = ${handleNode(init.arguments[0])}`;
-        } else {
-          throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
-        }
-      } else {
-        allocation = '';
-      }
     } else {
-      allocation = ` = ${handleNode(init)}`;
+      allocation = handleAlloc(init, typeAnnotation);
     }
   }
 
@@ -343,6 +299,57 @@ function handleAssign(node) {
     qualifier = `${q} `;
   }
   return `${qualifier}${typeAnnotation} ${name}${allocation}`;
+}
+
+function handleAlloc(init, typeAnnotation) {
+  let allocation = '';
+  if (init.type === 'CallExpression') {
+
+    switch (typeAnnotation) {
+      case 'int':
+      case 'float':
+      case 'bool':
+      case 'vec2':
+      case 'vec3':
+      case 'vec4':
+      case 'mat3':
+      case 'mat4':
+        if (init.arguments.length) {
+          allocation = ` = ${handleNode(init)}`;
+        } else {
+          allocation = '';
+        }
+        break;
+      default:
+        if (init.arguments.length) {
+          if (init.arguments.length === 1) {
+            const [first] = init.arguments;
+            if (first.type === 'ArrayExpression') {
+              allocation = ` = ${typeAnnotation}(${first.elements.map(handleNode).join(', ')})`;
+            } else {
+              allocation = ` = ${handleNode(init.arguments[0])}`;
+            }
+          } else {
+            throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
+          }
+        }
+        break;
+    }
+  } else if (init.type === 'NewExpression') {
+    if (init.arguments.length) {
+      if (init.arguments.length === 1) {
+        allocation = ` = ${handleNode(init.arguments[0])}`;
+      } else {
+        throwError(`classes dont support init calls yet ${typeAnnotation} `, init);
+      }
+    } else {
+      allocation = '';
+    }
+  } else {
+    allocation = ` = ${handleNode(init)}`;
+  }
+
+  return allocation;
 }
 
 function handleBody(body, tabCount = 0) {
