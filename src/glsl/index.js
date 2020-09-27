@@ -181,11 +181,13 @@ function ident(node) {
 }
 
 function memExp(node) {
-  const { object, property } = node;
+  const { object, property, computed } = node;
   if (property.type === 'Literal' || property.type === 'CallExpression') {
     return `${handleNode(object)}[${handleNode(property)}]`;
   }
-  // console.log('memExp', object.name, node);
+  if (computed) {
+    return `${handleNode(object)}[${handleNode(property)}]`;
+  }
   return `${handleNode(object)}.${handleNode(property)}`;
 }
 

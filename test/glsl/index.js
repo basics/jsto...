@@ -190,6 +190,22 @@ MyType bar;
     assert.equal(glsl.trim(), expected.trim());
   });
 
+  it('works with mat access arrays', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = mat4(1.0);
+      let x = int(3);
+      let bar = float(foo[x][1]);
+    });
+
+    const expected = `
+mat4 foo = mat4(1.0);
+int x = int(3);
+float bar = float(foo[x][1]);
+      `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
   it('works with float arrays', () => {
     const { glsl } = buildGLSL(() => {
       let foo = float([1.0, 2.0]);
