@@ -64,6 +64,6 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "acorn": "8.0.1"
+    "acorn": "8.0.4"
   }
 }
