@@ -41,7 +41,7 @@
     "@babel/register": "7.11.5",
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-conventional": "11.0.0",
-    "@types/mocha": "8.0.3",
+    "@types/mocha": "8.0.4",
     "babel-eslint": "10.1.0",
     "babel-plugin-istanbul": "6.0.0",
     "babel-preset-minify": "0.5.1",
