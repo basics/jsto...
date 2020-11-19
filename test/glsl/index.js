@@ -276,10 +276,8 @@ vec2 bar(vec2 x, float y) {
       let baz = vec2(0.0);
     });
 
-    console.log('ast', ast.body[0].expression.body.body);
-
     const expected = `
-const uniform vec2 foo = vec2(0.0);
+uniform vec2 foo = vec2(0.0);
 const vec2 bar = vec2(0.0);
 vec2 baz = vec2(0.0);
   `;

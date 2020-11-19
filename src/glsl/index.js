@@ -305,12 +305,10 @@ function handleAssign(node, kind) {
   let qualifier = '';
   if (q) {
     qualifier = `${q} `;
+  } else if (kind === 'const') {
+    qualifier = 'const ';
   }
-  let k = '';
-  if (kind === 'const') {
-    k = 'const ';
-  }
-  return `${k}${qualifier}${typeAnnotation} ${name}${allocation}`;
+  return `${qualifier}${typeAnnotation} ${name}${allocation}`;
 }
 
 function handleAlloc(init, typeAnnotation, name) {
