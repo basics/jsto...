@@ -257,4 +257,32 @@ vec2 bar(vec2 x, float y) {
     assert.equal(glsl.trim(), expected.trim());
   });
 
+
+  it('throw an error when type is forgotten.', () => {
+    assert.throws(() => {
+      buildGLSL(() => {
+        let bar = vec2((x = vec2()) => {
+          let y = normalize(x) * 10.0;
+          return vec2(x.x, y);
+        });
+      });
+    });
+  });
+
+  it('const handling works.', () => {
+    const { glsl, ast } = buildGLSL(() => {
+      const foo = uniform(vec2(0.0));
+      const bar = vec2(0.0);
+      let baz = vec2(0.0);
+    });
+
+    console.log('ast', ast.body[0].expression.body.body);
+
+    const expected = `
+const uniform vec2 foo = vec2(0.0);
+const vec2 bar = vec2(0.0);
+vec2 baz = vec2(0.0);
+  `;
+    assert.equal(glsl.trim(), expected.trim());
+  });
 });

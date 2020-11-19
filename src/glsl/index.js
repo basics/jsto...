@@ -256,8 +256,8 @@ function calExp(node) {
   return `${name}(${args.map(handleNode).join(', ')})`;
 }
 
-function varDec({ declarations }) {
-  return declarations.map(handleAssign).join('; ');
+function varDec({ declarations, kind }) {
+  return declarations.map((declaration) => handleAssign(declaration, kind)).join('; ');
 }
 
 function throwError(msg, node) {
@@ -266,7 +266,7 @@ function throwError(msg, node) {
   throw error;
 }
 
-function handleAssign(node) {
+function handleAssign(node, kind) {
   const { init, id } = node;
   let { name, typeAnnotation, qualifier: q } = id;
 
@@ -295,12 +295,22 @@ function handleAssign(node) {
       allocation = handleAlloc(init, typeAnnotation, name);
     }
   }
+  if (!typeAnnotation) {
+    throwError(`
+      handleAssign() 2 no type defined for ${id.name} allocation ${allocation}
+      ${JSON.stringify(node, null, '\t')}
+    `, id);
+  }
 
   let qualifier = '';
   if (q) {
     qualifier = `${q} `;
   }
-  return `${qualifier}${typeAnnotation} ${name}${allocation}`;
+  let k = '';
+  if (kind === 'const') {
+    k = 'const ';
+  }
+  return `${k}${qualifier}${typeAnnotation} ${name}${allocation}`;
 }
 
 function handleAlloc(init, typeAnnotation, name) {
