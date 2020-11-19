@@ -202,6 +202,24 @@ float action(vec2 one, vec2 two) {
     assert.equal(result.w, 1);
   });
 
+  it('works fine with glsl flexible vector factories with singlee argument', () => {
+    const shader = ({ vec4, vec2 }) => {
+      let bar = vec4((x = vec2()) => {
+        return vec4(vec4(x, 1.0, 1.0));
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(new Vec2(3, 2));
+    assert.equal(result.x, 3);
+    assert.equal(result.y, 2);
+    assert.equal(result.z, 1);
+    assert.equal(result.w, 1);
+  });
+
   it('works fine with glsl asin multiple types.', () => {
     const shader = ({ asin, vec2 }) => {
       let bar = vec2((x = vec2()) => {
@@ -250,6 +268,22 @@ float action(vec2 one, vec2 two) {
     assert.equal(result.y, 1);
     assert.equal(result.z, 0);
     assert.equal(result.w, 1);
+  });
+
+  it('works when using mix.', () => {
+    const shader = ({ mix, vec2 }) => {
+      let bar = vec2(() => {
+        return mix(vec2(1.0, 0.0), vec2(3.0, 6.0), 0.5);
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar();
+    assert.equal(result.x, 2);
+    assert.equal(result.y, 3);
   });
 
   it('works fine with sampler2D from array buffer.', () => {

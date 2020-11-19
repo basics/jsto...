@@ -27,6 +27,7 @@
     "no-tabs": "off",
     "no-underscore-dangle": "off",
     "prefer-spread": "off",
-    "no-shadow": "off"
+    "no-shadow": "off",
+    "no-unused-vars": "warn"
   }
 }

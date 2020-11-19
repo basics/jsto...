@@ -40,17 +40,18 @@ this can be archived with typescript, but not at runtime.
 - [ ] type inference
 - [ ] jstoGLSL transpiler great for performance
   - [x] generate valid glsl code
-  - [ ] glsl polyfills
+  - [ ] js transformations to glsl
     - [x] modulo as arithmetic operator
     - [x] pow as arithmetic operator
-    - [ ] symbols and enums
+    - [ ] variable index expression for vectors
     - [ ] destruct
+    - [ ] symbols and enums
     - [ ] functional structs
     - [ ] inline functions for map, reduce, filter
 - [x] jstoGLSL simulator great for testing
-  - [x] painting slowly to image buffer
+  - [x] painting (slowly) to image buffer
   - [x] vector arithmetic (component wise) operator support
-  - [ ] matrix algebraic operator support
+  - [x] partly matrix algebraic operator support
   - [ ] multithreading
   - [ ] typesafety
 
