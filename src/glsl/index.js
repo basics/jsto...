@@ -291,6 +291,7 @@ function handleAssign(node, kind) {
     if (init.type === 'ArrowFunctionExpression') {
       typeAnnotation = init.returnType;
       allocation = handleNode(init);
+      kind = undefined;
     } else {
       allocation = handleAlloc(init, typeAnnotation, name);
     }

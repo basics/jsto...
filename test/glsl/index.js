@@ -163,7 +163,7 @@ void main() {
 
   it('works with struct', () => {
     const { glsl } = buildGLSL(() => {
-      let MyType = cls({
+      const MyType = cls({
         fNormal: vec3,
         vNormal: vec3
       });
@@ -274,12 +274,26 @@ vec2 bar(vec2 x, float y) {
       const foo = uniform(vec2(0.0));
       const bar = vec2(0.0);
       let baz = vec2(0.0);
+
+      const fnFloat = float(() => {
+        return 5.0;
+      });
+
+      const fnFVoid = () => {
+        5.0 + 7.0;
+      };
     });
 
     const expected = `
 uniform vec2 foo = vec2(0.0);
 const vec2 bar = vec2(0.0);
 vec2 baz = vec2(0.0);
+float fnFloat() {
+\treturn 5.0;
+}
+void fnFVoid() {
+\t5.0 + 7.0;
+}
   `;
     assert.equal(glsl.trim(), expected.trim());
   });
