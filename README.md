@@ -44,10 +44,11 @@ this can be archived with typescript, but not at runtime.
     - [x] modulo as arithmetic operator
     - [x] pow as arithmetic operator
     - [ ] variable index expression for vectors
+    - [ ] gentype for function outline
+    - [ ] functional structs
     - [ ] destruct
     - [ ] symbols and enums
-    - [ ] functional structs
-    - [ ] inline functions for map, reduce, filter
+    
 - [x] jstoGLSL simulator great for testing
   - [x] painting (slowly) to image buffer
   - [x] vector arithmetic (component wise) operator support
