@@ -270,7 +270,7 @@ vec2 bar(vec2 x, float y) {
   });
 
   it('const handling works.', () => {
-    const { glsl, ast } = buildGLSL(() => {
+    const { glsl } = buildGLSL(() => {
       const foo = uniform(vec2(0.0));
       const bar = vec2(0.0);
       let baz = vec2(0.0);
@@ -295,6 +295,47 @@ void fnFVoid() {
 \t5.0 + 7.0;
 }
   `;
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('interpret gentype works.', () => {
+    const { glsl, ast } = buildGLSL(() => {
+      const foo = gentype((x = gentype()) => {
+        let res = gentype(x * 5.0);
+        return res;
+      });
+    });
+
+    const expected = `
+gentype foo(gentype x) {
+\tgentype res = x * 5.0;
+\treturn res;
+}
+  `;
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works glsl 3.0 in and out.', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = input(vec2);
+
+      let bar = output(vec2);
+
+      let baz = (x = vec2(), y = float()) => {
+        x = normalize(x);
+        bar = x;
+      };
+    });
+
+    const expected = `
+in vec2 foo;
+out vec2 bar;
+void baz(vec2 x, float y) {
+\tx = normalize(x);
+\tbar = x;
+}
+  `;
+
     assert.equal(glsl.trim(), expected.trim());
   });
 });
