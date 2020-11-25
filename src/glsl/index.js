@@ -10,7 +10,9 @@ const ORIGINALS = Symbol('Originals');
 const qualifiers = [
   'varying',
   'uniform',
-  'attribute'
+  'attribute',
+  'input',
+  'output'
 ];
 
 const TREE_SETTINGS = {
@@ -167,11 +169,21 @@ function retSta({ argument }) {
   return `return ${handleNode(argument)}`;
 }
 
+function prepareQualifier(qualifier) {
+  if (qualifier === 'input') {
+    return 'in';
+  }
+  if (qualifier === 'output') {
+    return 'out';
+  }
+  return qualifier;
+}
+
 function ident(node) {
   let { name, typeAnnotation, qualifier } = node;
   let q = '';
   if (qualifier) {
-    q = `${qualifier} `;
+    q = `${prepareQualifier(qualifier)} `;
   }
   let t = '';
   if (typeAnnotation) {
@@ -305,7 +317,7 @@ function handleAssign(node, kind) {
 
   let qualifier = '';
   if (q) {
-    qualifier = `${q} `;
+    qualifier = `${prepareQualifier(q)} `;
   } else if (kind === 'const') {
     qualifier = 'const ';
   }
@@ -370,6 +382,25 @@ function handleBody(body, tabCount = 0) {
     .join('\n');
 }
 
+// function replaceGenType(node) {
+//   console.log('replaceGenType', node);
+//   return node;
+// }
+//
+// function handleGenTypes(body) {
+//   return body.map((node) => {
+//     if (node.right && node.right.init && node.right.init.returnType === 'genType') {
+//       return [
+//         replaceGenType(JSON.parse(JSON.stringify(node)), 'float'),
+//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec2'),
+//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec3'),
+//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec4')
+//       ];
+//     }
+//     return [node];
+//   }).flat(1);
+// }
+
 export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } = {}) {
   // console.log('fun', fun.toString());
 
@@ -387,7 +418,7 @@ export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } 
       const { body } = node.body[0].expression;
 
       body.body = body.body.filter(({ type }) => (type !== 'ReturnStatement'));
-
+      // body.body = handleGenTypes(body.body);
       let sh = handleBody(body);
 
       sh = sh.split('\n').map((s) => {

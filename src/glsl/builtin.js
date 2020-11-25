@@ -248,7 +248,19 @@ export class BuiltIn {
     return undefined;
   }
 
+  output() {
+    return undefined;
+  }
+
   uniform() {
+    return readOnlyView(BLOCKED);
+  }
+
+  attribute() {
+    return readOnlyView(BLOCKED);
+  }
+
+  input() {
     return readOnlyView(BLOCKED);
   }
 
