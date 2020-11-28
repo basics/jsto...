@@ -401,6 +401,28 @@ function handleBody(body, tabCount = 0) {
 //   }).flat(1);
 // }
 
+function handeAst(node) {
+  const { body } = node.body[0].expression;
+
+  body.body = body.body.filter(({ type }) => (type !== 'ReturnStatement'));
+  // body.body = handleGenTypes(body.body);
+  let sh = handleBody(body);
+
+  sh = sh.split('\n').map((s) => {
+    const last = s[s.length - 1];
+    if (!s.length) {
+      return s;
+    }
+    if (last === '{' || last === '}' || last === ';' || last === '/') {
+      return s;
+    }
+    return `${s};`;
+  }).join('\n');
+
+  // console.log('\n' + sh + '\n');
+  return `${sh}\n`;
+}
+
 export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } = {}) {
   // console.log('fun', fun.toString());
 
@@ -415,25 +437,7 @@ export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } 
     }
 
     if (glsl) {
-      const { body } = node.body[0].expression;
-
-      body.body = body.body.filter(({ type }) => (type !== 'ReturnStatement'));
-      // body.body = handleGenTypes(body.body);
-      let sh = handleBody(body);
-
-      sh = sh.split('\n').map((s) => {
-        const last = s[s.length - 1];
-        if (!s.length) {
-          return s;
-        }
-        if (last === '{' || last === '}' || last === ';' || last === '/') {
-          return s;
-        }
-        return `${s};`;
-      }).join('\n');
-
-      // console.log('\n' + sh + '\n');
-      text = `${sh}\n`;
+      text = handeAst(node);
     }
 
     if (js) {
@@ -462,17 +466,7 @@ ${e.message}`);
 }
 
 export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
-  const { glsls, js, originals, keys } = args.reduce((mem, { glsl, [ORIGINALS]: originals }) => {
-    if (!glsl && glslOn) {
-      if (originals.length === 1) {
-        glsl = buildGLSL(originals[0], { glsl: true }).glsl;
-      } else {
-        glsl = joinGLSL(originals, { glsl: true }).glsl;
-      }
-    }
-    if (glsl) {
-      mem.glsls.push(glsl);
-    }
+  const { asts, js, originals, keys } = args.reduce((mem, { [ORIGINALS]: originals, ast }) => {
     if (jsOn) {
       originals.forEach((original) => {
         mem.js = sim(original, { BuiltIn }, mem.keys);
@@ -483,10 +477,39 @@ export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
       });
     }
     mem.originals.push(...originals);
+    mem.asts.push(ast);
     return mem;
-  }, { glsls: [], js: undefined, keys: {}, originals: [] });
+  }, { asts: [], js: undefined, keys: {}, originals: [] });
 
-  const glsl = glsls.length ? glsls.join('\n') : undefined;
+  let glsl;
+  if (glslOn) {
+    const { body, mains } = asts.reduce((mem, node) => {
+      let { body: { body } } = node.body[0].expression;
+      let main = body[0].declarations.find(({ id }) => (id && id.name === 'main'));
+      body[0].declarations = body[0].declarations.filter(({ id }) => (!id || id.name !== 'main'));
+
+      mem.body.push(...body);
+      if (main) {
+        mem.mains.push(main);
+      }
+      return mem;
+    }, { body: [], mains: [] });
+
+    if (mains.length) {
+      const initBody = mains.reduce((res, { init: { body } }) => {
+        res.push(...body.body);
+        return res;
+      }, []);
+
+      const main = mains[0];
+      main.init.body.body = initBody;
+
+      body.push({ declarations: [main], type: 'VariableDeclaration', kind: 'let' });
+    }
+
+    glsl = handeAst({ body: [{ expression: { body: { body } } }] });
+  }
+
   if (js) {
     Object.entries(keys).forEach(([key, value]) => {
       if (!js[key]) {

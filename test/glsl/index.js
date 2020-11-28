@@ -246,7 +246,6 @@ vec2[2] foo; foo[0] = vec2(1.0, 2.0); foo[1] = vec(3.0, 4.0);
 
     const expected = `
 uniform vec2 foo;
-
 vec2 bar(vec2 x, float y) {
 \tx = normalize(x);
 \treturn vec2(x.x, y);
@@ -335,6 +334,31 @@ void baz(vec2 x, float y) {
 \tbar = x;
 }
   `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works with merging multiple main functions', () => {
+    const one = buildGLSL(() => {
+      let main = fun(() => {
+        const foo = vec2(1.0);
+      });
+    });
+
+    const two = buildGLSL(() => {
+      let main = fun(() => {
+        const bar = vec2(1.0);
+      });
+    });
+
+    const { glsl } = joinGLSL([one, two]);
+
+    const expected = `
+void main() {
+\tconst vec2 foo = vec2(1.0);
+\tconst vec2 bar = vec2(1.0);
+}
+    `;
 
     assert.equal(glsl.trim(), expected.trim());
   });
