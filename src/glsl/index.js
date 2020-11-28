@@ -466,18 +466,20 @@ ${e.message}`);
 }
 
 export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false } = {}) {
-  const { asts, js, originals, keys } = args.reduce((mem, { [ORIGINALS]: originals, ast }) => {
-    if (jsOn) {
-      originals.forEach((original) => {
+  const { asts, js, originals, keys } = args.reduce((mem, { [ORIGINALS]: originals }) => {
+    originals.forEach((original) => {
+      if (jsOn) {
+
         mem.js = sim(original, { BuiltIn }, mem.keys);
 
         Object.entries(mem.js).forEach(([key, value]) => {
           mem.keys[key] = value;
         });
-      });
-    }
+      }
+      const ast = parse(original.toString(), TREE_SETTINGS);
+      mem.asts.push(ast);
+    });
     mem.originals.push(...originals);
-    mem.asts.push(ast);
     return mem;
   }, { asts: [], js: undefined, keys: {}, originals: [] });
 

@@ -362,4 +362,36 @@ void main() {
 
     assert.equal(glsl.trim(), expected.trim());
   });
+
+  it('works when joining already joined properties', () => {
+    const one = buildGLSL(() => {
+      let main = fun(() => {
+        const foo = vec2(1.0);
+      });
+    });
+
+    const two = buildGLSL(() => {
+      let main = fun(() => {
+        const bar = vec2(1.0);
+      });
+    });
+
+    const three = buildGLSL(() => {
+      let baz = input(vec2(1.0));
+    });
+
+    const joined = joinGLSL([one, two]);
+
+    const {glsl} = joinGLSL([joined, three]);
+
+    const expected = `
+in vec2 baz = vec2(1.0);
+void main() {
+\tconst vec2 foo = vec2(1.0);
+\tconst vec2 bar = vec2(1.0);
+}
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
 });
