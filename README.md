@@ -12,8 +12,7 @@ this libary is going to provide you a simple way of writing typed js code.
 this code can run and tested directly with js.
 but with types it can be transpiled to other languages, too.
 
-a type checker is in process, too. there will be a simple checking without type inference,
-this can be archived with typescript, but not at runtime.
+type inference is supported by type checker.
 
 | environment              | jsto... checker | typescript |
 | ------------------------ | :-------------: | :--------: |
@@ -25,9 +24,7 @@ this can be archived with typescript, but not at runtime.
 | ----------- | :-------------: | :--------: |
 | functions   |        ✓        |     ✓      |
 | arguments   |        ✓        |     ✓      |
-| prototypes  |        ✓        |     ✓      |
-| classes     |        ✗        |     ✓      |
-| attributes  |        ✓        |     ✓      |
+| classes     |        ✓        |     ✓      |
 | methods     |        ✓        |     ✓      |
 | variables   |        ✗        |     ✓      |
 | arithmetics |        ✓        |     ✗      |
@@ -37,7 +34,7 @@ this can be archived with typescript, but not at runtime.
 - [x] generate JSTree out of js
   - ESTree + type annotations
 - [ ] index.d.ts file with generics for typescript
-- [ ] type inference
+- [x] type inference
 - [ ] jstoGLSL transpiler great for performance
   - [x] generate valid glsl code
   - [ ] js transformations to glsl
@@ -53,17 +50,12 @@ this can be archived with typescript, but not at runtime.
   - [x] painting (slowly) to image buffer
   - [x] vector arithmetic (component wise) operator support
   - [x] partly matrix algebraic operator support
-  - [ ] multithreading
   - [ ] typesafety
 
 in future
 
-- [ ] jstoWASM transpiler great for headless rendering
-  - [ ] first iteration implement glsl behavior (vector and matrix)
-  inspired by <https://github.com/AssemblyScript/assemblyscript>
-  use decompiler to compare <https://v8.dev/blog/wasm-decompile>
-- [ ] jstoWASM simulator
-- [ ] what other languages do we need?
+- [ ] jstoWorker
+  - [ ] transpile js code without overhead of types and arithmetics
 
 # JSTree extended from ESTree
 
