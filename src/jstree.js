@@ -1,16 +1,19 @@
 import * as acorn from 'acorn';
 
-function handleParam(param) {
+function handleParam(param, options) {
   const { type, left, right } = param;
   if (type !== 'AssignmentPattern') {
     throw new Error(`handleParam() no type defined for ${param}`);
   }
   if (right.type === 'Identifier') {
     const typeAnnotation = right.name;
-    return { ...left, typeAnnotation };
+    const p = { ...left, typeAnnotation };
+    options.scope[left.name] = typeAnnotation;
+    return p;
   } else if (right.type === 'CallExpression') {
     param.left.typeAnnotation = right.callee.name;
     [param.right] = right.arguments;
+    options.scope[param.left.name] = param.left.typeAnnotation;
     return param;
   }
   throw new Error(`dont know ${right}`);
@@ -28,7 +31,7 @@ function handleParams(fn, options) {
       [param.right] = right.arguments;
     }
 
-    return handleParam(param);
+    return handleParam(param, options);
   });
 
   let { body } = fn;
@@ -41,8 +44,22 @@ function handleParams(fn, options) {
   return { ...fn, body, params };
 }
 
+function extractFromScope(scope, name, args) {
+  if (!scope) {
+    return name;
+  }
+  const sc = scope[name];
+  if (!sc) {
+    return name;
+  }
+  if (typeof sc === 'function') {
+    return sc.apply(undefined, args.map(({ name }) => scope[name]));
+  }
+  return sc;
+}
+
 function extractType(node, target, options) {
-  const { qualifiers, integer, float, string, boolean } = options;
+  const { qualifiers, integer, float, string, boolean, scope, operators } = options;
   const { type, name, callee, arguments: args, value, raw } = node;
 
   if (type === 'CallExpression' || type === 'NewExpression') {
@@ -73,13 +90,16 @@ function extractType(node, target, options) {
     } else {
 
       const typeAnnotation = callee.name;
-
-
-      target.typeAnnotation = typeAnnotation;
+      target.typeAnnotation = extractFromScope(scope, typeAnnotation, args);
       target.newInit = node;
     }
   } else if (type === 'Identifier') {
-    target.typeAnnotation = name;
+    if (scope && scope[name]) {
+      target.typeAnnotation = extractFromScope(scope, name, []);
+      target.newInit = node;
+    } else {
+      target.typeAnnotation = name;
+    }
   } else if (type === 'NumericLiteral' || type === 'Literal') {
     if (typeof value === 'number') {
       if (raw.indexOf('.') < 0) {
@@ -113,8 +133,14 @@ function extractType(node, target, options) {
       value: operator === '-' ? -value : value
     };
   } else if (type === 'ArrowFunctionExpression') {
-    target.newInit = handleParams(node, options);
+    const newScope = { ...scope };
+    target.newInit = handleParams(node, { ...options, scope: newScope });
     target.newInit.returnType = 'void';
+  } else if (operators && type === 'BinaryExpression') {
+    const left = extractFromScope(scope, node.left.name, []);
+    const right = extractFromScope(scope, node.right.name, []);
+    target.typeAnnotation = operators(left, node.operator, right);
+    target.newInit = node;
   } else {
     target.newInit = node;
   }
@@ -160,6 +186,9 @@ function handleNode(node, options) {
     const { newInit = null, typeAnnotation = null, qualifier = null } = extractType(init, {}, options);
     node.id = { ...node.id, typeAnnotation, qualifier };
     node.init = newInit;
+
+    options.scope[node.id.name] = typeAnnotation;
+
     return node;
   }
 
@@ -169,10 +198,10 @@ function handleNode(node, options) {
   return node;
 }
 
-export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, ...options } = {}) {
+export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, operators, scope = {}, ...options } = {}) {
   // TODO: use onToken !!!!
   const ast = acorn.parse(input, { ...options, locations, ranges, ecmaVersion: 6 });
-  const node = handleNode(ast, { qualifiers, integer, float, string, boolean });
+  const node = handleNode(ast, { qualifiers, integer, float, string, boolean, scope, operators });
 
   return node;
 }

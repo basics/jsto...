@@ -411,7 +411,7 @@ describe('jstree autodetect primitive tests', () => {
     assert.equal(init.raw, 'true');
   });
 
-  it('works with cls', () => {
+  it('works with class', () => {
 
     const node = parse(`
       let MyType = cls({
@@ -434,5 +434,96 @@ describe('jstree autodetect primitive tests', () => {
     assert.equal(vNormal.type, 'PropertyDefinition');
     assert.equal(vNormal.typeAnnotation, 'Vec4');
     assert.equal(vNormal.key.name, 'vNormal');
+  });
+
+  it('auto detects type for inline variables', () => {
+    const node = parse(`let x = Vec2((y = Vec2()) => {
+      let foo = y;
+      return foo;
+    });`);
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'Vec2');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+    assert.equal(init.type, 'Identifier');
+    assert.equal(init.name, 'y');
+
+  });
+
+  it('auto detects type from builtin function', () => {
+    const node = parse(`let x = Vec2((y = Vec2()) => {
+      let foo = normalize(y);
+      return foo;
+    });`, { scope: {
+      normalize: (arg) => arg
+    } });
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'Vec2');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'normalize');
+
+  });
+
+  it('auto detects type from mathematical calculations', () => {
+    const node = parse(`let x = Vec2((y = Vec2(), z = Mat3()) => {
+      let foo = z * z;
+      let bar = y * foo;
+      return foo;
+    });`, { operators: (left, operator, right) => {
+      if (left === 'Mat3' && right === 'Mat3') {
+        return 'Mat3';
+      } if (left === 'Vec2' && right === 'Mat3') {
+        return 'Vec2';
+      }
+    } });
+
+    const [decl1] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const [decl2] = node.body[0].declarations[0].init.body.body[1].declarations;
+
+    const { id: id1 } = decl1;
+    const { id: id2 } = decl2;
+
+    assert.equal(id1.type, 'Identifier');
+    assert.equal(id1.typeAnnotation, 'Mat3');
+    assert.equal(id1.name, 'foo');
+    assert.equal(id1.qualifier, null);
+
+    assert.equal(id2.type, 'Identifier');
+    assert.equal(id2.typeAnnotation, 'Vec2');
+    assert.equal(id2.name, 'bar');
+    assert.equal(id2.qualifier, null);
+
+  });
+
+  it('explicit type priority over auto detects type', () => {
+    const node = parse(`let x = Vec2((y = Vec2()) => {
+      let foo = Vec3(normalize(y));
+      return foo;
+    });`, { scope: {
+      normalize: (arg) => arg
+    } });
+
+    const [declarator] = node.body[0].declarations[0].init.body.body[0].declarations;
+    const { id, init } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'Vec3');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+    assert.equal(init.type, 'CallExpression');
+    assert.equal(init.callee.name, 'Vec3');
   });
 });
