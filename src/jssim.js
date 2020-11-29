@@ -24,6 +24,15 @@ export function sim(func, { BuiltIn, ...options } = {}, extras) {
   let result;
   if (extras) {
     result = func(readOnlyView({ ...global, ...extras }));
+
+    const rm = result.main;
+    const em = extras.main;
+    if (rm && em) {
+      result.main = () => {
+        em();
+        rm();
+      };
+    }
   } else {
     result = func(gl);
   }

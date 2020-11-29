@@ -572,4 +572,44 @@ vec4 bar(vec2 x) {
     const resultOrg = min(Number(150), Number(120));
     assert.equal(resultOrg, 120);
   });
+
+  it('works fine with merging multiple mains', () => {
+    const shader1 = ({ output, vec2 }) => {
+      let foo = output(vec2(0.0));
+      let getFoo = vec2(() => {
+        return foo;
+      })
+      let main = () => {
+        foo = vec2(1.0);
+      }
+      return { getFoo, main };
+    };
+    const shader2 = ({ output, vec2 }) => {
+      let bar = output(vec2(0.0));
+      let getBar = vec2(() => {
+        return bar;
+      })
+      let main = () => {
+        bar = vec2(3.0);
+      }
+      return { getBar, main };
+    };
+    const one = buildGLSL(shader1, { glsl: false });
+    const two = buildGLSL(shader2, { glsl: false });
+    const mixed = joinGLSL([one, two], { js: true, glsl: false });
+    const { js } = mixed;
+
+    const { main, getFoo, getBar } = js;
+
+    main();
+
+    const bar = getBar();
+    assert.closeTo(bar.x, 3.0, 0.00001);
+    assert.closeTo(bar.y, 3.0, 0.00001);
+
+    const foo = getFoo();
+    assert.closeTo(foo.x, 1.0, 0.00001);
+    assert.closeTo(foo.y, 1.0, 0.00001);
+
+  });
 });
