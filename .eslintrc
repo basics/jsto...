@@ -28,6 +28,7 @@
     "no-underscore-dangle": "off",
     "prefer-spread": "off",
     "no-shadow": "off",
-    "no-unused-vars": "warn"
+    "no-unused-vars": "warn",
+    "arrow-body-style": "off"
   }
 }
