@@ -15,6 +15,7 @@ describe('glsl tests', () => {
       this.x = x;
       this.y = y;
     }
+
     valueOf() {
       return 5;
     }
@@ -26,6 +27,7 @@ describe('glsl tests', () => {
       this.y = y;
       this.z = z;
     }
+
     valueOf() {
       return 5;
     }
@@ -38,13 +40,16 @@ describe('glsl tests', () => {
       this.z = z;
       this.w = w;
     }
+
     valueOf() {
       return 5;
     }
   }
 
   const jsOptions = {
-    Vec2, Vec3, Vec4,
+    Vec2,
+    Vec3,
+    Vec4,
     calc: calcSim
   };
   buildGLSL(() => { return {}; }, { glsl: false, js: jsOptions });
@@ -578,20 +583,20 @@ vec4 bar(vec2 x) {
       let foo = output(vec2(0.0));
       let getFoo = vec2(() => {
         return foo;
-      })
+      });
       let main = () => {
         foo = vec2(1.0);
-      }
+      };
       return { getFoo, main };
     };
     const shader2 = ({ output, vec2 }) => {
       let bar = output(vec2(0.0));
       let getBar = vec2(() => {
         return bar;
-      })
+      });
       let main = () => {
         bar = vec2(3.0);
-      }
+      };
       return { getBar, main };
     };
     const one = buildGLSL(shader1, { glsl: false });

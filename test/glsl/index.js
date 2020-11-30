@@ -384,29 +384,54 @@ float bar = baz();
     assert.equal(glsl.trim(), expected.trim());
   });
 
-//   it('works with joining chunks auto detection', () => {
-//     const one = buildGLSL(() => {
-//       let foo = uniform(vec2);
-//     });
-//
-//     const two = buildGLSL(() => {
-//       let bar = vec2(() => {
-//         let res = foo;
-//         return res;
-//       });
-//     });
-//
-//     const { glsl } = joinGLSL([one, two]);
-//
-//     const expected = `
-// uniform vec2 foo;
-// vec2 bar() {
-// \tvec2 res = foo;
-// \treturn res;
-// }
-//     `;
-//
-//
-//     assert.equal(glsl.trim(), expected.trim());
-//   });
+  it('works with joining chunks auto detection', () => {
+    const one = buildGLSL(() => {
+      let foo = uniform(vec2);
+    });
+
+    const two = buildGLSL(() => {
+      let bar = vec2(() => {
+        let res = foo;
+        return res;
+      });
+    });
+
+    const { glsl } = joinGLSL([one, two]);
+
+    const expected = `
+uniform vec2 foo;
+vec2 bar() {
+\tvec2 res = foo;
+\treturn res;
+}
+    `;
+
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works when joining already joined properties', () => {
+    const one = buildGLSL(() => {
+      const foo = vec2(1.0);
+    });
+
+    const two = buildGLSL(() => {
+      const bar = vec2(1.0);
+    });
+
+    const three = buildGLSL(() => {
+      let baz = input(vec2(1.0));
+    });
+
+    const joined = joinGLSL([one, two]);
+    const { glsl } = joinGLSL([joined, three]);
+
+    const expected = `
+const vec2 foo = vec2(1.0);
+const vec2 bar = vec2(1.0);
+in vec2 baz = vec2(1.0);
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
 });
