@@ -187,7 +187,11 @@ function handleNode(node, options) {
     node.id = { ...node.id, typeAnnotation, qualifier };
     node.init = newInit;
 
-    options.scope[node.id.name] = typeAnnotation;
+    if (typeAnnotation) {
+      options.scope[node.id.name] = typeAnnotation;
+    } else if (newInit.returnType) {
+      options.scope[node.id.name] = newInit.returnType;
+    }
 
     return node;
   }
