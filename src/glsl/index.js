@@ -337,7 +337,7 @@ function handleAlloc(init, typeAnnotation, name) {
       case 'vec4':
       case 'mat3':
       case 'mat4':
-        if (init.arguments.length) {
+        if (init.arguments.length || typeAnnotation !== init.callee.name) {
           allocation = ` = ${handleNode(init)}`;
         } else {
           allocation = '';

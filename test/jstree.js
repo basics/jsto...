@@ -455,6 +455,28 @@ describe('jstree autodetect primitive tests', () => {
 
   });
 
+  it('auto detects return type of other functions for inline variables', () => {
+    const node = parse(`
+    let bar = float(() => {
+      return 5.0;
+    });
+
+    let x = Vec2((y = Vec2()) => {
+      let foo = bar();
+      return vec2(foo);
+    });
+    `);
+
+    const [declarator] = node.body[1].declarations[0].init.body.body[0].declarations;
+    const { id } = declarator;
+
+    assert.equal(id.type, 'Identifier');
+    assert.equal(id.typeAnnotation, 'float');
+    assert.equal(id.name, 'foo');
+    assert.equal(id.qualifier, null);
+
+  });
+
   it('auto detects type from builtin function', () => {
     const node = parse(`let x = Vec2((y = Vec2()) => {
       let foo = normalize(y);

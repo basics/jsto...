@@ -362,4 +362,51 @@ void main() {
 
     assert.equal(glsl.trim(), expected.trim());
   });
+
+  it('works with glsl autodetect type calling function', () => {
+    const { glsl } = buildGLSL(() => {
+      let baz = float(() => {
+        let foo = float(makeFloat());
+        return foo;
+      });
+
+      let bar = baz();
+    });
+
+    const expected = `
+float baz() {
+\tfloat foo = float(makeFloat());
+\treturn foo;
+}
+float bar = baz();
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+//   it('works with joining chunks auto detection', () => {
+//     const one = buildGLSL(() => {
+//       let foo = uniform(vec2);
+//     });
+//
+//     const two = buildGLSL(() => {
+//       let bar = vec2(() => {
+//         let res = foo;
+//         return res;
+//       });
+//     });
+//
+//     const { glsl } = joinGLSL([one, two]);
+//
+//     const expected = `
+// uniform vec2 foo;
+// vec2 bar() {
+// \tvec2 res = foo;
+// \treturn res;
+// }
+//     `;
+//
+//
+//     assert.equal(glsl.trim(), expected.trim());
+//   });
 });
