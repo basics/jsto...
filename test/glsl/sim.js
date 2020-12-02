@@ -324,22 +324,24 @@ float action(vec2 one, vec2 two) {
   it('works fine even with debug statements', () => {
 
     let warnRes;
-    const warn = (arg) => warnRes = arg;
+    const console = {
+      warn: (arg) => warnRes = arg
+    };
 
     const shader = ({ vec4, vec2 }) => {
       let bar = vec4((x = vec2()) => {
-        warn(`warning: ${x.x.toPrecision(8)}`);
+        console.warn(`warning: ${x.x.toPrecision(8)}`);
         return vec4(x, 1.0, 1.0);
       });
       return { bar };
     };
-    const { js, glsl } = buildGLSL(shader, { js: true });
+    const { js, glsl } = buildGLSL(shader, { js: true, ast: true });
 
     const { bar } = js;
 
     const expected = `
 vec4 bar(vec2 x) {
-\t/* warn statement */
+\t/* console statement */
 \treturn vec4(x, 1.0, 1.0);
 }
 `;
