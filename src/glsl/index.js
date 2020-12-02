@@ -246,24 +246,15 @@ function arrFun(node) {
 
 function calExp(node) {
   // console.log('calExp()', node.name, node);
-  const { arguments: args, callee: { name } } = node;
+  const { arguments: args, callee: { name, object } } = node;
+  if (object && object.name === 'console') {
+    return '/* console statement */';
+  }
   if (name === 'discard') {
     return 'discard';
   }
   if (name === 'calc') {
     return `(${handleNode(args[0].body)})`;
-  }
-  if (name === 'debug') {
-    return '/* debug statement */';
-  }
-  if (name === 'log') {
-    return '/* log statement */';
-  }
-  if (name === 'warn') {
-    return '/* warn statement */';
-  }
-  if (name === 'error') {
-    return '/* error statement */';
   }
   return `${name}(${args.map(handleNode).join(', ')})`;
 }
