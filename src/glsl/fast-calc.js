@@ -1,4 +1,3 @@
-
 const results = [new Array(1), new Array(2), new Array(3), new Array(4)];
 
 export function prepare(Class, length) {

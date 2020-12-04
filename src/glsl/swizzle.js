@@ -1,4 +1,3 @@
-
 const KEYS = ['x', 'y', 'z', 'w'];
 
 function prep(prototype, Class, ...keys) {
