@@ -1,4 +1,3 @@
-
 const IS_PROXY = Symbol('is proxy');
 const PROXY = Symbol('proxy source');
 
