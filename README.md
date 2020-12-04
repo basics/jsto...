@@ -33,7 +33,6 @@ type inference is supported by type checker.
 
 - [x] generate JSTree out of js
   - ESTree + type annotations
-- [ ] index.d.ts file with generics for typescript
 - [x] type inference
 - [ ] jstoGLSL transpiler great for performance
   - [x] generate valid glsl code
