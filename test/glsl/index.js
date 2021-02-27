@@ -212,7 +212,7 @@ float bar = float(foo[x][1]);
     });
 
     const expected = `
-float[2] foo; foo[0] = 1.0; foo[1] = 2.0;
+float[2] foo = foo[2](1.0, 2.0);
       `;
 
     assert.equal(glsl.trim(), expected.trim());
@@ -224,7 +224,7 @@ float[2] foo; foo[0] = 1.0; foo[1] = 2.0;
     });
 
     const expected = `
-vec2[2] foo; foo[0] = vec2(1.0, 2.0); foo[1] = vec(3.0, 4.0);
+vec2[2] foo = foo[2](vec2(1.0, 2.0), vec(3.0, 4.0));
       `;
 
     assert.equal(glsl.trim(), expected.trim());
@@ -252,10 +252,8 @@ vec2 bar(vec2 x, float y) {
 }
     `;
 
-
     assert.equal(glsl.trim(), expected.trim());
   });
-
 
   it('throw an error when type is forgotten.', () => {
     assert.throws(() => {
@@ -405,7 +403,6 @@ vec2 bar() {
 \treturn res;
 }
     `;
-
 
     assert.equal(glsl.trim(), expected.trim());
   });
