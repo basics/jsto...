@@ -340,7 +340,7 @@ function handleAlloc(init, typeAnnotation, name) {
             const [first] = init.arguments;
             if (first.type === 'ArrayExpression') {
               const els = first.elements.map((n) => `${handleNode(n)}`).join(', ');
-              allocation = ` = ${name}[${first.elements.length}](${els});`;
+              allocation = ` = ${typeAnnotation}(${els});`;
             } else {
               allocation = ` = ${handleNode(init.arguments[0])}`;
             }
