@@ -212,7 +212,7 @@ float bar = float(foo[x][1]);
     });
 
     const expected = `
-float[2] foo = foo[2](1.0, 2.0);
+float[2] foo = float[2](1.0, 2.0);
       `;
 
     assert.equal(glsl.trim(), expected.trim());
@@ -224,7 +224,7 @@ float[2] foo = foo[2](1.0, 2.0);
     });
 
     const expected = `
-vec2[2] foo = foo[2](vec2(1.0, 2.0), vec(3.0, 4.0));
+vec2[2] foo = vec2[2](vec2(1.0, 2.0), vec(3.0, 4.0));
       `;
 
     assert.equal(glsl.trim(), expected.trim());
