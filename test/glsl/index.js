@@ -431,4 +431,20 @@ in vec2 baz = vec2(1.0);
 
     assert.equal(glsl.trim(), expected.trim());
   });
+
+  it('support method calls', () => {
+    const { glsl } = buildGLSL(() => {
+      let foo = vec2([vec2(1.0, 2.0), vec2(3.0, 4.0)]);
+      let lon = int(mat.length);
+      let len = int(mat.length());
+    });
+
+    const expected = `
+vec2[2] foo = vec2[2](vec2(1.0, 2.0), vec2(3.0, 4.0));
+int lon = int(mat.length);
+int len = int(mat.length());
+    `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
 });

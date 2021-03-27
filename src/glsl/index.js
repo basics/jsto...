@@ -246,7 +246,9 @@ function arrFun(node) {
 
 function calExp(node) {
   // console.log('calExp()', node.name, node);
-  const { arguments: args, callee: { name, object } } = node;
+  const { arguments: args, callee } = node;
+  const { name, object } = callee;
+
   if (object && object.name === 'console') {
     return '/* console statement */';
   }
@@ -256,7 +258,7 @@ function calExp(node) {
   if (name === 'calc') {
     return `(${handleNode(args[0].body)})`;
   }
-  return `${name}(${args.map(handleNode).join(', ')})`;
+  return `${handleNode(callee)}(${args.map(handleNode).join(', ')})`;
 }
 
 function varDec({ declarations, kind }) {
