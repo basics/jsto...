@@ -63,6 +63,6 @@
     "rollup-plugin-commonjs": "10.1.0"
   },
   "dependencies": {
-    "acorn": "8.1.0"
+    "acorn": "8.4.0"
   }
 }
