@@ -8,8 +8,7 @@
             "targets": {
               "chrome": "63"
             },
-            "corejs": "3.1.4",
-            "useBuiltIns": "usage"
+            "useBuiltIns": false
           }
         ]
       ],
@@ -25,8 +24,7 @@
             "targets": {
               "chrome": "63"
             },
-            "corejs": "3.1.4",
-            "useBuiltIns": "usage"
+            "useBuiltIns": false
           }
         ]
       ],
