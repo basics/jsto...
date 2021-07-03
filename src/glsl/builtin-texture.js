@@ -64,7 +64,7 @@ export class Texture2D {
     let { buffer } = this.bufferRef;
     if (!buffer) {
       const { source, w, h } = this;
-      if (typeof Image !== 'undefined' && source.constructor === Image) {
+      if (typeof HTMLImageElement !== 'undefined' && source.constructor === HTMLImageElement) {
         let cvs = document.createElement('canvas');
         cvs.width = w;
         cvs.height = h;
