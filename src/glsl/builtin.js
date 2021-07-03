@@ -140,6 +140,10 @@ export class BuiltIn {
     return fastCalc(Math.ceil, x);
   }
 
+  round(x) {
+    return fastCalc(Math.round, x);
+  }
+
   fract(x) {
     return fastCalc((x) => x - Math.floor(x), x);
   }
@@ -390,5 +394,9 @@ export class BuiltIn {
 
   notEqual(x, y) {
     return !this.equal(x, y);
+  }
+
+  discard() {
+    throw new Error('discard');
   }
 }
