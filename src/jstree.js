@@ -204,7 +204,7 @@ function handleNode(node, options) {
 
 export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, operators, scope = {}, ...options } = {}) {
   // TODO: use onToken !!!!
-  const ast = acorn.parse(input, { ...options, locations, ranges, ecmaVersion: 6 });
+  const ast = acorn.parse(input, { ...options, locations, ranges, ecmaVersion: 'latest' });
   const node = handleNode(ast, { qualifiers, integer, float, string, boolean, scope, operators });
 
   return node;
