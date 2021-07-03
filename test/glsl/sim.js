@@ -306,7 +306,7 @@ float action(vec2 one, vec2 two) {
 
     const shader = ({ texture, vec2, vec4, sampler2D }) => {
       let bar = vec4((image = sampler2D()) => {
-        return texture(image, vec2(0.0, 0.0));
+        return texture(image, vec2(0.5, 0.5));
       });
       return { bar };
     };

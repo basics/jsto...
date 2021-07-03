@@ -13,8 +13,8 @@ export class Texture2D {
 
   get(builtIn, pos) {
     const { w, h, bilinear } = this;
-    let x = pos.x * w;
-    let y = pos.y * h;
+    let x = pos.x * w - 0.5;
+    let y = pos.y * h - 0.5;
 
     x = (x + w) % w;
     y = (y + h) % h;
