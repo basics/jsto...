@@ -43,6 +43,10 @@ export function fun(type, func) {
     let result;
     try {
       result = func.apply(this);
+
+      if (activeArgList && activeArgIndex < activeArgList.length) {
+        throw new Error(`wrong argument length? expected: ${activeArgIndex} is: ${activeArgList.length}`);
+      }
     } finally {
       activeArgList = undefined;
       activeArgIndex = -999;
