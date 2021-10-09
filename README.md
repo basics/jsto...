@@ -6,7 +6,7 @@
 [![Dependencies Status](https://david-dm.org/basics/jsto.../status.svg)](https://david-dm.org/basics/jsto...)
 [![DevDependencies Status](https://david-dm.org/basics/jsto.../dev-status.svg)](https://david-dm.org/basics/jsto...?type=dev)
 
-# jsto ...
+# jsto
 
 this libary is going to provide you a simple way of writing typed js code.
 this code can run and tested directly with js.
@@ -39,12 +39,12 @@ type inference is supported by type checker.
   - [ ] js transformations to glsl
     - [x] modulo as arithmetic operator
     - [x] pow as arithmetic operator
-    - [ ] variable index expression for vectors
+    - [x] variable index expression for vectors
     - [ ] gentype for function outline
     - [ ] functional structs
     - [ ] destruct
     - [ ] symbols and enums
-    
+
 - [x] jstoGLSL simulator great for testing
   - [x] painting (slowly) to image buffer
   - [x] vector arithmetic (component wise) operator support
