@@ -12,7 +12,7 @@ function prep(prototype, Class, ...keys) {
   });
 }
 
-function prepare(Class, { Vec2, Vec3, Vec4 }, keysVec, keysCol) {
+function prepare(Class, { Vec2, Vec3, Vec4 }, keysVec, keysCol, indexCol) {
   const { prototype } = Class;
   const keys = [...keysVec, ...keysCol];
 
@@ -34,12 +34,24 @@ function prepare(Class, { Vec2, Vec3, Vec4 }, keysVec, keysCol) {
 
   keys.forEach((a) => keys.forEach((b) => keys.forEach((c) => keys.forEach((d) => prep(prototype, Vec4, a, b, c, d)))));
 
+  indexCol.forEach((index) => {
+    let key = keysVec[parseInt(index, 10)];
+    Object.defineProperty(prototype, index, {
+      get() {
+        return this[key];
+      },
+      set(value) {
+        this[key] = value;
+        return true;
+      }
+    });
+  });
 }
 
 export function swizzle(options) {
 
-  prepare(options.Vec2, options, ['x', 'y'], ['r', 'g']);
-  prepare(options.Vec3, options, ['x', 'y', 'z'], ['r', 'g', 'b']);
-  prepare(options.Vec4, options, ['x', 'y', 'z', 'w'], ['r', 'g', 'b', 'a']);
+  prepare(options.Vec2, options, ['x', 'y'], ['r', 'g'], ['0', '1']);
+  prepare(options.Vec3, options, ['x', 'y', 'z'], ['r', 'g', 'b'], ['0', '1', '2']);
+  prepare(options.Vec4, options, ['x', 'y', 'z', 'w'], ['r', 'g', 'b', 'a'], ['0', '1', '2', '3']);
 
 }

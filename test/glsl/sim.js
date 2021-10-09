@@ -189,6 +189,21 @@ float action(vec2 one, vec2 two) {
     assert.equal(result.z, 0);
   });
 
+  it('works fine with glsl swizzles index getter.', () => {
+    const shader = ({ float, vec2 }) => {
+      let bar = float((x = vec2()) => {
+        return x[1];
+      });
+      return { bar };
+    };
+    const { js } = buildGLSL(shader, { js: true, glsl: false });
+
+    const { bar } = js;
+
+    const result = bar(new Vec2(3, 6));
+    assert.equal(result, 6);
+  });
+
   it('works fine with glsl flexible vector factories.', () => {
     const shader = ({ vec4, vec2 }) => {
       let bar = vec4((x = vec2()) => {
