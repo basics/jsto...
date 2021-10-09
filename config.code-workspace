@@ -41,8 +41,7 @@
       ".vcmrc": "json",
       "*.css": "postcss",
       "*.pcss": "postcss"
-    },
-    "javascript.implicitProjectConfig.checkJs": true
+    }
   },
   "extensions": {
     "recommendations": [

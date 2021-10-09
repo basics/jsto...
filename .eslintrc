@@ -29,6 +29,7 @@
     "prefer-spread": "off",
     "no-shadow": "off",
     "no-unused-vars": "warn",
-    "arrow-body-style": "off"
+    "arrow-body-style": "off",
+    "prefer-arrow-callback": "off"
   }
 }
