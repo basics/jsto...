@@ -4,6 +4,7 @@
   "description": "transpile js to other languages",
   "main": "./index.js",
   "module": "./build/esm/index.js",
+  "types": "./index.d.ts",
   "directories": {
     "build": "build"
   },
@@ -60,6 +61,7 @@
     "rollup-plugin-babel": "4.4.0",
     "rollup-plugin-babel-minify": "10.0.0",
     "rollup-plugin-node-resolve": "5.2.0",
+    "rollup-plugin-copy": "3.4.0",
     "semantic-release": "17.4.2",
     "rollup-plugin-commonjs": "10.1.0"
   },

@@ -2,6 +2,7 @@ const babel = require('rollup-plugin-babel');
 const resolve = require('rollup-plugin-node-resolve');
 const minify = require('rollup-plugin-babel-minify');
 const commonjs = require('rollup-plugin-commonjs');
+const copy = require('rollup-plugin-copy');
 
 module.exports = [
   {
@@ -29,6 +30,14 @@ module.exports = [
         exclude: 'node_modules/**',
         presets: [['@babel/preset-env', { modules: false }]]
       }),
+      copy({
+        targets: [
+          {
+            src: "src/index.d.ts",
+            dest: "./",
+          }
+        ]
+      })
     ]
   }, ...[
     {
@@ -71,6 +80,6 @@ module.exports = [
           bannerNewLine: true
         })
       ]
-    }
+    };
   })
 ];
