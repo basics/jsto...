@@ -18,7 +18,9 @@ type TypeOf<T> = TypedClass<T> | GetNumber<T> | GetString<T> | GetBoolean<T> | T
 
 declare function typ<T>(type: TypeOf<T>): T;
 
-declare function fun<F>(func: F): F extends (...args: any) => void ? (...args: (Required<Parameters<F>> & Array<any>)) => void : ExpectedReturnType<void>;
-declare function fun<F, T>(type: TypeOf<T>, func: F): F extends (...args: any) => T ? (...args: (Required<Parameters<F>> & Array<any>)) => T : ExpectedReturnType<T>;
+type Fun<R> = (...args: any) => R;
 
-declare function cls<T>(prototype: T): T extends { constructor?(...args: any): void, [key: string]: unknown } ? new (...args: (Parameters<T['constructor']>)) => T : (new () => T);
+declare function fun<F>(func: F): F extends Fun<void> ? (...args: (Required<Parameters<F>> & Array<any>)) => void : ExpectedReturnType<void>;
+declare function fun<F, T>(type: TypeOf<T>, func: F): F extends Fun<T> ? (...args: (Required<Parameters<F>> & Array<any>)) => T : ExpectedReturnType<T>;
+
+declare function cls<T>(clazz: T): T extends abstract new (...args: any) => any ? new (...args: (Required<ConstructorParameters<T>> & Array<any>)) => InstanceType<T> : never;

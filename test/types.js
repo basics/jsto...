@@ -15,15 +15,18 @@ describe('type safety tests', () => {
   const bool2 = typ(Boolean);
   const bool3 = typ(true);
 
-  const C = cls({
-    // h: typ(string),
-    constructor: fun((hello = typ(string)) => {
-      // this.h = hello;
-    }),
-    hallo: fun(string, (hello = typ(string)) => {
+  const C = cls(class {
+
+    h = typ(string);
+
+    constructor(hello = typ(string)) {
+      this.he = hello;
+    }
+
+    hallo = fun(string, (hello = typ(string)) => {
 
       return hello;
-    })
+    });
   });
 
   const fun1 = fun(string, (str = typ(string), num = typ(number)) => {
@@ -42,15 +45,19 @@ describe('type safety tests', () => {
     const world = c.hallo('world');
 
     assert.equal(world, 'world');
+
+    c.h = 'foo';
+
+    assert.equal(c.h, 'foo');
   });
 
   it('throw errors on invalid typings', () => {
-    const funBroken = fun(number, (str = typ(string), blub = typ(number)) => {
-
-      return 'bar';
-    });
 
     assert.throws(() => {
+      const funBroken = fun(number, (str = typ(string), blub = typ(number)) => {
+
+        return 'bar';
+      });
       funBroken('1', 2);
     });
 
@@ -63,7 +70,17 @@ describe('type safety tests', () => {
     });
 
     assert.throws(() => {
+      c.hallo(1, 2);
+    });
+
+    assert.throws(() => {
       const c2 = new C(1);
+    });
+
+    assert.throws(() => {
+      const c2 = new C('');
+
+      c2.h = 1;
     });
   });
 });

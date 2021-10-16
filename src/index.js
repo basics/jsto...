@@ -1,10 +1,13 @@
 import { getSource, readOnlyView, isInstanceOf } from './utils';
 
 const TYPED_FUN = Symbol('typed function');
+const TYPED_PROP = Symbol('typed property');
 const INNER_DATA = Symbol('inner data');
 
 let activeArgList;
 let activeArgIndex;
+
+let insideConstructor = false;
 
 export const string = String;
 export const number = Number;
@@ -14,6 +17,13 @@ export function typ(typeDesc) {
   const { type, def } = extractType(typeDesc);
   if (!type) {
     throw new Error('no type assigned');
+  }
+  if ((!activeArgList || activeArgIndex === activeArgList.length) && insideConstructor) {
+    return {
+      [TYPED_PROP]: true,
+      type,
+      def
+    };
   }
   if (activeArgList) {
     let arg = activeArgList[activeArgIndex];
@@ -60,13 +70,80 @@ export function fun(type, func) {
 }
 
 export function cls(classDesc) {
-  if (!(typeof classDesc === 'object')) {
-    return classDesc;
+  let { constructor, ...proto } = classDesc;
+
+  let realClass = false;
+  if (typeof classDesc === 'function') {
+    realClass = true;
+    constructor = classDesc;
+    proto = classDesc.prototype;
   }
-  const { constructor, ...proto } = classDesc;
 
   const types = {};
-  const prototype = {};
+
+  let Con;
+  if (realClass) {
+    Con = class Con extends classDesc {
+
+      constructor(...args) {
+        activeArgList = args;
+        activeArgIndex = 0;
+        insideConstructor = true;
+
+        try {
+          super();
+          if (activeArgList && activeArgIndex < activeArgList.length) {
+            throw new Error(`wrong argument length? expected: ${activeArgIndex} is: ${activeArgList.length}`);
+          }
+        } finally {
+          activeArgList = undefined;
+          activeArgIndex = -999;
+          insideConstructor = false;
+        }
+
+        Object.entries(this)
+          .forEach(([key, prop]) => {
+            if (!prop || !prop[TYPED_PROP]) {
+              return;
+            }
+            const { type, def } = prop;
+
+            if (def !== undefined) {
+              checkType(def, type, `check type for setter of type ${type}`);
+            }
+            Object.defineProperty(this, key, {
+              get() {
+                return getInner(this, key);
+              },
+              set(value) {
+                checkType(value, type, `check type for setter of type ${type}`);
+                return setInner(this, key, value);
+              }
+            });
+          });
+      }
+    };
+  } else {
+    Con = function Constructor(...args) {
+      if (isInstanceOf(this, Constructor)) {
+        constructor.apply(this, args);
+      } else {
+        if (!args.length) {
+          return typ(Con);
+        }
+        const [funDef] = args;
+        if (typeof funDef !== 'function') {
+          if (isInstanceOf(funDef, Con)) {
+            return funDef;
+          }
+          throw new Error('only fun definition allowd');
+        }
+        return fun(Con, funDef);
+      }
+    };
+  }
+
+  const { prototype } = Con;
 
   Object.entries(proto).forEach(([key, val]) => {
     if (!val) {
@@ -95,25 +172,6 @@ export function cls(classDesc) {
       }
     });
   });
-  const Con = function Constructor(...args) {
-    if (isInstanceOf(this, Constructor)) {
-      constructor.apply(this, args);
-    } else {
-      if (!args.length) {
-        return typ(Con);
-      }
-      const [funDef] = args;
-      if (typeof funDef !== 'function') {
-        if (isInstanceOf(funDef, Con)) {
-          return funDef;
-        }
-        throw new Error('only fun definition allowd');
-      }
-      return fun(Con, funDef);
-    }
-  };
-
-  Con.prototype = prototype;
 
   return readOnlyView(Con);
 }
