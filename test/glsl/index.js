@@ -295,23 +295,6 @@ void fnFVoid() {
     assert.equal(glsl.trim(), expected.trim());
   });
 
-  it('interpret gentype works.', () => {
-    const { glsl, ast } = buildGLSL(() => {
-      const foo = gentype((x = gentype()) => {
-        let res = gentype(x * 5.0);
-        return res;
-      });
-    });
-
-    const expected = `
-gentype foo(gentype x) {
-\tgentype res = x * 5.0;
-\treturn res;
-}
-  `;
-    assert.equal(glsl.trim(), expected.trim());
-  });
-
   it('works glsl 3.0 in and out.', () => {
     const { glsl } = buildGLSL(() => {
       let foo = input(vec2);
@@ -444,6 +427,53 @@ vec2[2] foo = vec2[2](vec2(1.0, 2.0), vec2(3.0, 4.0));
 int lon = int(mat.length);
 int len = int(mat.length());
     `;
+
+    assert.equal(glsl.trim(), expected.trim());
+  });
+
+  it('works fine with joining glsl snippets type inference', () => {
+    const shader1 = ({ cls, vec2, float }) => {
+      let Foo = cls({
+        bar: vec2,
+        zahl: float
+      });
+      let prepareBar = Foo((g = float()) => {
+        let fee = new Foo();
+        fee.bar = vec2(g, 2.0);
+        fee.zahl = 5.0;
+        return fee;
+      });
+      return { Foo, prepareBar };
+    };
+    const shader2 = ({ vec2, Foo, prepareBar }) => {
+      let bar = Foo(() => {
+        let baz = prepareBar(4.0);
+        baz.bar = vec2(1.0, 2.0);
+        baz.zahl = 5.0;
+        return baz;
+      });
+      return { bar };
+    };
+    const one = buildGLSL(shader1);
+    const two = buildGLSL(shader2);
+    const mixed = joinGLSL([one, two], { glsl: true, js: true /* only for debugging */ });
+    const { glsl } = mixed;
+
+    const expected = `
+struct Foo { vec2 bar; float zahl; };
+Foo prepareBar(float g) {
+\tFoo fee;
+\tfee.bar = vec2(g, 2.0);
+\tfee.zahl = 5.0;
+\treturn fee;
+}
+Foo bar() {
+\tFoo baz = prepareBar(4.0);
+\tbaz.bar = vec2(1.0, 2.0);
+\tbaz.zahl = 5.0;
+\treturn baz;
+}
+`;
 
     assert.equal(glsl.trim(), expected.trim());
   });

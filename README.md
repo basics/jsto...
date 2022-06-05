@@ -41,7 +41,7 @@ type inference is supported by type checker.
     - [x] pow as arithmetic operator
     - [x] variable index expression for vectors
     - [ ] gentype for function outline
-    - [ ] functional structs
+    - [x] functional structs
     - [ ] destruct
     - [ ] symbols and enums
 

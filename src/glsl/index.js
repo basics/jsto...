@@ -322,6 +322,7 @@ function handleAlloc(init, typeAnnotation, name) {
   if (init.type === 'CallExpression') {
 
     switch (typeAnnotation) {
+      // BuiltIn info!
       case 'int':
       case 'float':
       case 'bool':
@@ -336,21 +337,29 @@ function handleAlloc(init, typeAnnotation, name) {
           allocation = '';
         }
         break;
-      default:
-        if (init.arguments.length) {
+      default: {
+        const [first] = init.arguments;
+
+        if (typeAnnotation === init.callee.name || (first && first.type === 'ArrayExpression')) {
           if (init.arguments.length === 1) {
-            const [first] = init.arguments;
+
             if (first.type === 'ArrayExpression') {
-              const els = first.elements.map((n) => `${handleNode(n)}`).join(', ');
+              const els = first.elements.map((n) => `${handleNode(n)}`)
+                .join(', ');
               allocation = ` = ${typeAnnotation}(${els});`;
             } else {
               allocation = ` = ${handleNode(init.arguments[0])}`;
             }
+          } else if (!init.arguments.length) {
+            allocation = '';
           } else {
             throwError(`classes dont support init calls yet ${typeAnnotation}`, init);
           }
+        } else {
+          allocation = ` = ${handleNode(init)};`;
         }
         break;
+      }
     }
   } else if (init.type === 'NewExpression') {
     if (init.arguments.length) {
@@ -376,30 +385,10 @@ function handleBody(body, tabCount = 0) {
     .join('\n');
 }
 
-// function replaceGenType(node) {
-//   console.log('replaceGenType', node);
-//   return node;
-// }
-//
-// function handleGenTypes(body) {
-//   return body.map((node) => {
-//     if (node.right && node.right.init && node.right.init.returnType === 'genType') {
-//       return [
-//         replaceGenType(JSON.parse(JSON.stringify(node)), 'float'),
-//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec2'),
-//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec3'),
-//         replaceGenType(JSON.parse(JSON.stringify(node)), 'vec4')
-//       ];
-//     }
-//     return [node];
-//   }).flat(1);
-// }
-
 function handeAst(node) {
   const { body } = node.body[0].expression;
 
   body.body = body.body.filter(({ type }) => (type !== 'ReturnStatement'));
-  // body.body = handleGenTypes(body.body);
   let sh = handleBody(body);
 
   sh = sh.split('\n').map((s) => {
@@ -424,24 +413,26 @@ export function buildGLSL(fun, { glsl = true, js = undefined, ast = undefined } 
   let node;
   let code;
   let text;
+
+  if (js) {
+    if (js === true) {
+      js = {};
+    }
+    if (js) {
+      code = readOnlyView(sim(fun, { BuiltIn, ...js }));
+    }
+  }
   try {
     if (glsl || ast) {
       str = fun.toString();
-      node = parse(str, TREE_SETTINGS);
+      node = parse(str, { ...TREE_SETTINGS });
     }
 
     if (glsl) {
       text = handeAst(node);
     }
 
-    if (js) {
-      if (js === true) {
-        js = {};
-      }
-      code = sim(fun, { BuiltIn, ...js });
-    }
-
-    return { glsl: text, ast: node, js: readOnlyView(code), [ORIGINALS]: [fun] };
+    return { glsl: text, ast: node, js: code, [ORIGINALS]: [fun] };
   } catch (e) {
     if (e[LINE]) {
       const allLines = str.split('\n');
@@ -459,28 +450,39 @@ ${e.message}`);
   }
 }
 
-export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false, ast: astOn = false } = {}) {
-  const options = { ...TREE_SETTINGS, scope: {} };
-  const { asts, js, originals, keys } = args.reduce((mem, { [ORIGINALS]: originals }) => {
-    if (jsOn) {
-      originals.forEach((original) => {
-        mem.js = sim(original, { BuiltIn }, mem.keys);
+export function joinGLSL(args, { glsl: glslOn = true, js = undefined, ast: astOn = false } = {}) {
+  if (js === true) {
+    js = {};
+  }
+  if (js) {
+    js = { BuiltIn, ...js };
+  }
 
-        Object.entries(mem.js).forEach(([key, value]) => {
-          mem.keys[key] = value;
-        });
+  const options = { ...TREE_SETTINGS, scope: {} };
+  const { asts, js: newJs, originals, keys } = args.reduce((mem, { [ORIGINALS]: originals }) => {
+
+    if (js) {
+      originals.forEach((original) => {
+
+        mem.js = sim(original, mem.js, mem.keys);
+
+        Object.entries(mem.js)
+          .forEach(([key, value]) => {
+            mem.keys[key] = value;
+          });
       });
     }
     if (glslOn || astOn) {
+      const opt = { ...options };
       originals.forEach((fun) => {
         const str = fun.toString();
-        const ast = parse(str, options);
+        const ast = parse(str, opt);
         mem.asts.push(ast);
       });
     }
     mem.originals.push(...originals);
     return mem;
-  }, { asts: [], js: undefined, keys: {}, originals: [] });
+  }, { asts: [], js, keys: {}, originals: [] });
 
   let glsl;
   if (glslOn) {
@@ -511,14 +513,13 @@ export function joinGLSL(args, { glsl: glslOn = true, js: jsOn = false, ast: ast
     glsl = handeAst({ body: [{ expression: { body: { body } } }] });
   }
 
-  if (js) {
-    Object.entries(keys).forEach(([key, value]) => {
-      if (!js[key]) {
-        js[key] = value;
-      }
-    });
-  }
-  return { glsl, js: readOnlyView(js), [ORIGINALS]: originals };
+  Object.entries(keys).forEach(([key, value]) => {
+    if (!newJs[key]) {
+      newJs[key] = value;
+    }
+  });
+
+  return { glsl, js: readOnlyView(newJs), [ORIGINALS]: originals };
 }
 
 export function addErrorHandling(glsl) {
