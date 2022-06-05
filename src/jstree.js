@@ -59,7 +59,7 @@ function extractFromScope(scope, name, args) {
 }
 
 function extractType(node, target, options) {
-  const { qualifiers, integer, float, string, boolean, scope, operators } = options;
+  const { qualifiers, integer, float, string, boolean, scope } = options;
   const { type, name, callee, arguments: args, value, raw } = node;
 
   if (type === 'CallExpression' || type === 'NewExpression') {
@@ -136,10 +136,34 @@ function extractType(node, target, options) {
     const newScope = { ...scope };
     target.newInit = handleParams(node, { ...options, scope: newScope });
     target.newInit.returnType = 'void';
-  } else if (operators && type === 'BinaryExpression') {
+  } else if (type === 'BinaryExpression') {
     const left = extractFromScope(scope, node.left.name, []);
     const right = extractFromScope(scope, node.right.name, []);
-    target.typeAnnotation = operators(left, node.operator, right);
+    switch (node.operator) {
+      case '+': {
+        target.typeAnnotation = scope.add(left, right);
+        break;
+      }
+      case '-': {
+        target.typeAnnotation = scope.sub(left, right);
+        break;
+      }
+      case '*': {
+        target.typeAnnotation = scope.mul(left, right);
+        break;
+      }
+      case '/': {
+        target.typeAnnotation = scope.div(left, right);
+        break;
+      }
+      case '%': {
+        target.typeAnnotation = scope.mod(left, right);
+        break;
+      }
+      default:
+        // do nothing
+        break;
+    }
     target.newInit = node;
   } else {
     target.newInit = node;
@@ -202,10 +226,10 @@ function handleNode(node, options) {
   return node;
 }
 
-export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, operators, scope = {}, ...options } = {}) {
+export function parse(input, { qualifiers = [], float = 'Number', integer = float, string = 'String', boolean = 'Boolean', locations = false, ranges = false, scope = {}, ...options } = {}) {
   // TODO: use onToken !!!!
   const ast = acorn.parse(input, { ...options, locations, ranges, ecmaVersion: 'latest' });
-  const node = handleNode(ast, { qualifiers, integer, float, string, boolean, scope, operators });
+  const node = handleNode(ast, { qualifiers, integer, float, string, boolean, scope });
 
   return node;
 }

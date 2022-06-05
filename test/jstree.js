@@ -371,7 +371,6 @@ describe('jstree autodetect primitive tests', () => {
     assert.equal(init.raw, '+5.0');
   });
 
-
   it('extract type via autodetect integer', () => {
     const node = parse('let x = 5;', { integer: 'SPECIAL' });
 
@@ -503,11 +502,14 @@ describe('jstree autodetect primitive tests', () => {
       let foo = z * z;
       let bar = y * foo;
       return foo;
-    });`, { operators: (left, operator, right) => {
-      if (left === 'Mat3' && right === 'Mat3') {
-        return 'Mat3';
-      } if (left === 'Vec2' && right === 'Mat3') {
-        return 'Vec2';
+    });`, { scope: {
+
+      mul: (left, right) => {
+        if (left === 'Mat3' && right === 'Mat3') {
+          return 'Mat3';
+        } if (left === 'Vec2' && right === 'Mat3') {
+          return 'Vec2';
+        }
       }
     } });
 
