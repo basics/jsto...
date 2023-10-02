@@ -293,7 +293,7 @@ float action(vec2 one, vec2 two) {
   it('works when using mix.', () => {
     const shader = ({ mix, vec2 }) => {
       let bar = vec2(() => {
-        return mix(vec2(1.0, 0.0), vec2(3.0, 6.0), 0.5);
+        return mix(vec2(1.0, 0.0), vec2(4.0, 6.0), 0.75);
       });
       return { bar };
     };
@@ -302,8 +302,8 @@ float action(vec2 one, vec2 two) {
     const { bar } = js;
 
     const result = bar();
-    assert.equal(result.x, 2);
-    assert.equal(result.y, 3);
+    assert.equal(result.x, 3.25);
+    assert.equal(result.y, 4.5);
   });
 
   it('works fine with sampler2D from array buffer.', () => {

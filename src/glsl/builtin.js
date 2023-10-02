@@ -167,7 +167,7 @@ export class BuiltIn {
 
   mix(x, y, alpha) {
     return fastCalc(
-      (x, y, alpha) => alpha * x + (1 - alpha) * y,
+      (x, y, alpha) => (1 - alpha) * x + alpha * y,
       x, y, alpha
     );
   }
